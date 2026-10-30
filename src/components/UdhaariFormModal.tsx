@@ -1,10 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { X, User, Phone, CheckCircle2, Split, BookUser } from 'lucide-react';
+import { X, CheckCircle2, Split, BookUser } from 'lucide-react';
 import type { UdhaariRecord, UdhaariFormData, FormValidationErrors } from '../types/udhaari';
 import { paiseToRupees, formatINR, amountInWords } from '../utils/currency';
 import { getTodayDateString } from '../utils/date';
 import { validateIndianMobile } from '../utils/validation';
-import { pickContact } from '../services/contactPicker';
+import { ContactPickerModal } from './ContactPickerModal';
 
 interface UdhaariFormModalProps {
   isOpen: boolean;
@@ -37,31 +37,7 @@ export const UdhaariFormModal: React.FC<UdhaariFormModalProps> = ({
 
   const [errors, setErrors] = useState<FormValidationErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isPickingContact, setIsPickingContact] = useState(false);
-
-  const handlePickContact = async () => {
-    try {
-      setIsPickingContact(true);
-      const result = await pickContact();
-      if (result) {
-        setFormData((prev) => ({
-          ...prev,
-          personName: prev.personName ? prev.personName : (result.name || prev.personName),
-          phoneNumber: result.phoneNumber || prev.phoneNumber,
-        }));
-        setErrors((prev) => {
-          const updated = { ...prev };
-          if (result.phoneNumber) delete updated.phoneNumber;
-          if (result.name) delete updated.personName;
-          return updated;
-        });
-      }
-    } catch (err) {
-      console.warn('Error while picking contact:', err);
-    } finally {
-      setIsPickingContact(false);
-    }
-  };
+  const [isContactPickerOpen, setIsContactPickerOpen] = useState(false);
 
   useEffect(() => {
     if (editingRecord) {
@@ -179,6 +155,20 @@ export const UdhaariFormModal: React.FC<UdhaariFormModalProps> = ({
     }
   };
 
+  const handleContactSelected = (contact: { name: string; phoneNumber: string }) => {
+    setFormData((prev) => ({
+      ...prev,
+      personName: prev.personName ? prev.personName : (contact.name || prev.personName),
+      phoneNumber: contact.phoneNumber || prev.phoneNumber,
+    }));
+    if (contact.phoneNumber && errors.phoneNumber) {
+      setErrors((prev) => ({ ...prev, phoneNumber: undefined }));
+    }
+    if (contact.name && errors.personName) {
+      setErrors((prev) => ({ ...prev, personName: undefined }));
+    }
+  };
+
   const parsedAmountForHelper = parseFloat(String(formData.amountRupees || '').trim().replace(/,/g, ''));
   const amountPreview =
     !isNaN(parsedAmountForHelper) && parsedAmountForHelper > 0
@@ -186,30 +176,30 @@ export const UdhaariFormModal: React.FC<UdhaariFormModalProps> = ({
       : null;
 
   return (
-    <div className="modal-overlay" onClick={onClose}>
-      <div className="modal-content-sheet" onClick={(e) => e.stopPropagation()}>
-        <div className="modal-header">
-          <h2 className="modal-title">
-            {isEditing ? 'Edit Credit Record' : 'Record New Credit'}
-          </h2>
-          <button
-            type="button"
-            className="modal-close-btn"
-            onClick={onClose}
-            aria-label="Close dialog"
-          >
-            <X size={18} />
-          </button>
-        </div>
+    <>
+      <div className="modal-overlay" onClick={onClose}>
+        <div className="modal-content-sheet" onClick={(e) => e.stopPropagation()}>
+          <div className="modal-header">
+            <h2 className="modal-title">
+              {isEditing ? 'Edit Credit Record' : 'Record New Credit'}
+            </h2>
+            <button
+              type="button"
+              className="modal-close-btn"
+              onClick={onClose}
+              aria-label="Close dialog"
+            >
+              <X size={18} />
+            </button>
+          </div>
 
-        <form onSubmit={handleSubmit} noValidate>
-          {/* Person's Name */}
-          <div className="form-group">
-            <label className="form-label" htmlFor="personName" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-              <span>Customer Name</span>
-              <span className="required-star">*</span>
-            </label>
-            <div style={{ position: 'relative' }}>
+          <form onSubmit={handleSubmit} noValidate>
+            {/* Person's Name */}
+            <div className="form-group">
+              <label className="form-label" htmlFor="personName" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                <span>Customer Name</span>
+                <span className="required-star">*</span>
+              </label>
               <input
                 id="personName"
                 type="text"
@@ -222,200 +212,217 @@ export const UdhaariFormModal: React.FC<UdhaariFormModalProps> = ({
                 }}
                 autoFocus
               />
-              <User
-                size={16}
-                color="var(--text-secondary)"
-                style={{ position: 'absolute', right: 14, top: 15, pointerEvents: 'none' }}
-              />
+              {errors.personName && (
+                <div className="form-error-msg">{errors.personName}</div>
+              )}
             </div>
-            {errors.personName && (
-              <div className="form-error-msg">{errors.personName}</div>
-            )}
-          </div>
 
-          {/* Amount in Rupees */}
-          <div className="form-group">
-            <label className="form-label" htmlFor="amountRupees" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-              <span>Credit Amount (₹)</span>
-              <span className="required-star">*</span>
-            </label>
-            <div style={{ position: 'relative' }}>
-              <input
-                id="amountRupees"
-                type="number"
-                inputMode="decimal"
-                className={`form-input ${errors.amountRupees ? 'has-error' : ''}`}
-                placeholder="₹ 0"
-                value={formData.amountRupees}
-                onChange={(e) => {
-                  setFormData({ ...formData, amountRupees: e.target.value });
-                  if (errors.amountRupees) setErrors({ ...errors, amountRupees: undefined });
-                }}
-              />
-              <span style={{ position: 'absolute', right: 14, top: 13, fontWeight: 600, color: 'var(--text-secondary)' }}>
-                INR
-              </span>
-            </div>
-            {amountPreview && (
-              <div style={{ fontSize: '0.74rem', color: 'var(--primary)', marginTop: 4, fontWeight: 500 }}>
-                {amountPreview}
-              </div>
-            )}
-            {errors.amountRupees && (
-              <div className="form-error-msg">{errors.amountRupees}</div>
-            )}
-          </div>
-
-          {/* Paid Amount (Only in Edit mode) */}
-          {isEditing && (
+            {/* Amount in Rupees */}
             <div className="form-group">
-              <label className="form-label" htmlFor="paidRupees">
-                Amount Paid So Far (₹)
+              <label className="form-label" htmlFor="amountRupees" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
+                <span>Credit Amount (₹)</span>
+                <span className="required-star">*</span>
               </label>
               <div style={{ position: 'relative' }}>
                 <input
-                  id="paidRupees"
+                  id="amountRupees"
                   type="number"
                   inputMode="decimal"
-                  className={`form-input ${errors.paidRupees ? 'has-error' : ''}`}
-                  value={formData.paidRupees}
+                  style={{ paddingRight: '48px' }}
+                  className={`form-input ${errors.amountRupees ? 'has-error' : ''}`}
+                  placeholder="₹ 0"
+                  value={formData.amountRupees}
                   onChange={(e) => {
-                    setFormData({ ...formData, paidRupees: e.target.value });
-                    if (errors.paidRupees) setErrors({ ...errors, paidRupees: undefined });
+                    setFormData({ ...formData, amountRupees: e.target.value });
+                    if (errors.amountRupees) setErrors({ ...errors, amountRupees: undefined });
                   }}
                 />
-                <Split
-                  size={16}
-                  color="var(--text-secondary)"
-                  style={{ position: 'absolute', right: 14, top: 15, pointerEvents: 'none' }}
-                />
+                <span
+                  style={{
+                    position: 'absolute',
+                    right: 14,
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    fontWeight: 600,
+                    color: 'var(--text-secondary)',
+                    pointerEvents: 'none',
+                  }}
+                >
+                  INR
+                </span>
               </div>
-              {errors.paidRupees && (
-                <div className="form-error-msg">{errors.paidRupees}</div>
+              {amountPreview && (
+                <div style={{ fontSize: '0.74rem', color: 'var(--primary)', marginTop: 4, fontWeight: 500 }}>
+                  {amountPreview}
+                </div>
+              )}
+              {errors.amountRupees && (
+                <div className="form-error-msg">{errors.amountRupees}</div>
               )}
             </div>
-          )}
 
-          {/* Date Row: Date Given and Due Date */}
-          <div className="form-row-2">
-            <div className="form-group">
-              <label className="form-label" htmlFor="dateGiven">
-                Date Given <span className="required-star">*</span>
-              </label>
-              <input
-                id="dateGiven"
-                type="date"
-                className="form-input"
-                value={formData.dateGiven}
-                onChange={(e) => setFormData({ ...formData, dateGiven: e.target.value })}
-              />
+            {/* Paid Amount (Only in Edit mode) */}
+            {isEditing && (
+              <div className="form-group">
+                <label className="form-label" htmlFor="paidRupees">
+                  Amount Paid So Far (₹)
+                </label>
+                <div style={{ position: 'relative' }}>
+                  <input
+                    id="paidRupees"
+                    type="number"
+                    inputMode="decimal"
+                    style={{ paddingRight: '40px' }}
+                    className={`form-input ${errors.paidRupees ? 'has-error' : ''}`}
+                    value={formData.paidRupees}
+                    onChange={(e) => {
+                      setFormData({ ...formData, paidRupees: e.target.value });
+                      if (errors.paidRupees) setErrors({ ...errors, paidRupees: undefined });
+                    }}
+                  />
+                  <Split
+                    size={16}
+                    color="var(--text-secondary)"
+                    style={{
+                      position: 'absolute',
+                      right: 14,
+                      top: '50%',
+                      transform: 'translateY(-50%)',
+                      pointerEvents: 'none',
+                    }}
+                  />
+                </div>
+                {errors.paidRupees && (
+                  <div className="form-error-msg">{errors.paidRupees}</div>
+                )}
+              </div>
+            )}
+
+            {/* Date Row: Date Given and Due Date */}
+            <div className="form-row-2">
+              <div className="form-group">
+                <label className="form-label" htmlFor="dateGiven">
+                  Date Given <span className="required-star">*</span>
+                </label>
+                <input
+                  id="dateGiven"
+                  type="date"
+                  className="form-input"
+                  value={formData.dateGiven}
+                  onChange={(e) => setFormData({ ...formData, dateGiven: e.target.value })}
+                />
+              </div>
+
+              <div className="form-group">
+                <label className="form-label" htmlFor="dueDate">
+                  Due Date (Optional)
+                </label>
+                <input
+                  id="dueDate"
+                  type="date"
+                  className="form-input"
+                  value={formData.dueDate}
+                  onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
+                />
+              </div>
             </div>
 
+            {/* Phone Number with Clickable Contact Icon */}
             <div className="form-group">
-              <label className="form-label" htmlFor="dueDate">
-                Due Date (Optional)
-              </label>
-              <input
-                id="dueDate"
-                type="date"
-                className="form-input"
-                value={formData.dueDate}
-                onChange={(e) => setFormData({ ...formData, dueDate: e.target.value })}
-              />
-            </div>
-          </div>
-
-          {/* Phone Number with Contact Picker */}
-          <div className="form-group">
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
-              <label className="form-label" htmlFor="phoneNumber" style={{ margin: 0 }}>
+              <label className="form-label" htmlFor="phoneNumber">
                 Phone Number (Optional)
               </label>
+              <div style={{ position: 'relative' }}>
+                <input
+                  id="phoneNumber"
+                  type="tel"
+                  inputMode="tel"
+                  style={{ paddingRight: '48px' }}
+                  className={`form-input ${errors.phoneNumber ? 'has-error' : ''}`}
+                  placeholder="10-digit mobile number"
+                  value={formData.phoneNumber}
+                  onChange={(e) => {
+                    setFormData({ ...formData, phoneNumber: e.target.value });
+                    if (errors.phoneNumber) setErrors({ ...errors, phoneNumber: undefined });
+                  }}
+                />
+                <button
+                  type="button"
+                  onClick={() => setIsContactPickerOpen(true)}
+                  title="Choose from Contacts (Search)"
+                  aria-label="Select from Contacts"
+                  style={{
+                    position: 'absolute',
+                    right: 8,
+                    top: '50%',
+                    transform: 'translateY(-50%)',
+                    background: 'rgba(99, 102, 241, 0.15)',
+                    border: '1px solid rgba(99, 102, 241, 0.35)',
+                    borderRadius: 8,
+                    width: 32,
+                    height: 32,
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    cursor: 'pointer',
+                    color: 'var(--primary, #6366f1)',
+                    padding: 0,
+                    transition: 'all 0.15s ease',
+                  }}
+                >
+                  <BookUser size={16} />
+                </button>
+              </div>
+              {errors.phoneNumber && (
+                <div className="form-error-msg">{errors.phoneNumber}</div>
+              )}
+            </div>
+
+            {/* Notes */}
+            <div className="form-group">
+              <label className="form-label" htmlFor="notes">
+                Notes / Description (Optional)
+              </label>
+              <textarea
+                id="notes"
+                className="form-textarea"
+                placeholder="e.g. Grocery items, invoice #104, rice bag..."
+                rows={2}
+                value={formData.notes}
+                onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
+              />
+            </div>
+
+            {/* Action Buttons */}
+            <div className="form-actions-row">
               <button
                 type="button"
-                onClick={handlePickContact}
-                disabled={isPickingContact}
-                style={{
-                  display: 'inline-flex',
-                  alignItems: 'center',
-                  gap: 5,
-                  fontSize: '0.74rem',
-                  padding: '4px 9px',
-                  borderRadius: 6,
-                  background: 'rgba(99, 102, 241, 0.15)',
-                  color: 'var(--primary, #6366f1)',
-                  border: '1px solid rgba(99, 102, 241, 0.3)',
-                  cursor: isPickingContact ? 'wait' : 'pointer',
-                  fontWeight: 600,
-                  transition: 'all 0.2s ease',
-                }}
-                title="Pick customer name and number from phonebook"
+                className="btn-secondary"
+                onClick={onClose}
+                disabled={isSubmitting}
               >
-                <BookUser size={13} />
-                <span>{isPickingContact ? 'Opening Contacts...' : 'Choose from Contacts'}</span>
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="btn-primary"
+                disabled={isSubmitting}
+              >
+                <CheckCircle2 size={16} />
+                <span>{isSubmitting ? 'Saving...' : isEditing ? 'Update Credit' : 'Save Credit'}</span>
               </button>
             </div>
-            <div style={{ position: 'relative' }}>
-              <input
-                id="phoneNumber"
-                type="tel"
-                inputMode="tel"
-                className={`form-input ${errors.phoneNumber ? 'has-error' : ''}`}
-                placeholder="10-digit mobile number or choose above"
-                value={formData.phoneNumber}
-                onChange={(e) => {
-                  setFormData({ ...formData, phoneNumber: e.target.value });
-                  if (errors.phoneNumber) setErrors({ ...errors, phoneNumber: undefined });
-                }}
-              />
-              <Phone
-                size={16}
-                color="var(--text-secondary)"
-                style={{ position: 'absolute', right: 14, top: 15, pointerEvents: 'none' }}
-              />
-            </div>
-            {errors.phoneNumber && (
-              <div className="form-error-msg">{errors.phoneNumber}</div>
-            )}
-          </div>
-
-          {/* Notes */}
-          <div className="form-group">
-            <label className="form-label" htmlFor="notes">
-              Notes / Description (Optional)
-            </label>
-            <textarea
-              id="notes"
-              className="form-textarea"
-              placeholder="e.g. Grocery items, invoice #104, rice bag..."
-              rows={2}
-              value={formData.notes}
-              onChange={(e) => setFormData({ ...formData, notes: e.target.value })}
-            />
-          </div>
-
-          {/* Action Buttons */}
-          <div className="form-actions-row">
-            <button
-              type="button"
-              className="btn-secondary"
-              onClick={onClose}
-              disabled={isSubmitting}
-            >
-              Cancel
-            </button>
-            <button
-              type="submit"
-              className="btn-primary"
-              disabled={isSubmitting}
-            >
-              <CheckCircle2 size={16} />
-              <span>{isSubmitting ? 'Saving...' : isEditing ? 'Update Credit' : 'Save Credit'}</span>
-            </button>
-          </div>
-        </form>
+          </form>
+        </div>
       </div>
-    </div>
+
+      {/* Searchable Contact Picker Modal */}
+      <ContactPickerModal
+        isOpen={isContactPickerOpen}
+        onClose={() => setIsContactPickerOpen(false)}
+        onSelect={handleContactSelected}
+      />
+    </>
   );
 };
 

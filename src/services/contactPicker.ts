@@ -69,3 +69,4 @@ export async function pickContact(): Promise<PickedContact | null> {
     return null;
   }
 }
+
