@@ -1,9 +1,10 @@
 import React, { useState, useEffect } from 'react';
-import { X, User, Phone, CheckCircle2, Split } from 'lucide-react';
+import { X, User, Phone, CheckCircle2, Split, BookUser } from 'lucide-react';
 import type { UdhaariRecord, UdhaariFormData, FormValidationErrors } from '../types/udhaari';
 import { paiseToRupees, formatINR, amountInWords } from '../utils/currency';
 import { getTodayDateString } from '../utils/date';
 import { validateIndianMobile } from '../utils/validation';
+import { pickContact } from '../services/contactPicker';
 
 interface UdhaariFormModalProps {
   isOpen: boolean;
@@ -36,6 +37,31 @@ export const UdhaariFormModal: React.FC<UdhaariFormModalProps> = ({
 
   const [errors, setErrors] = useState<FormValidationErrors>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isPickingContact, setIsPickingContact] = useState(false);
+
+  const handlePickContact = async () => {
+    try {
+      setIsPickingContact(true);
+      const result = await pickContact();
+      if (result) {
+        setFormData((prev) => ({
+          ...prev,
+          personName: prev.personName ? prev.personName : (result.name || prev.personName),
+          phoneNumber: result.phoneNumber || prev.phoneNumber,
+        }));
+        setErrors((prev) => {
+          const updated = { ...prev };
+          if (result.phoneNumber) delete updated.phoneNumber;
+          if (result.name) delete updated.personName;
+          return updated;
+        });
+      }
+    } catch (err) {
+      console.warn('Error while picking contact:', err);
+    } finally {
+      setIsPickingContact(false);
+    }
+  };
 
   useEffect(() => {
     if (editingRecord) {
@@ -299,18 +325,43 @@ export const UdhaariFormModal: React.FC<UdhaariFormModalProps> = ({
             </div>
           </div>
 
-          {/* Phone Number */}
+          {/* Phone Number with Contact Picker */}
           <div className="form-group">
-            <label className="form-label" htmlFor="phoneNumber">
-              Phone Number (For WhatsApp reminders)
-            </label>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 6 }}>
+              <label className="form-label" htmlFor="phoneNumber" style={{ margin: 0 }}>
+                Phone Number (Optional)
+              </label>
+              <button
+                type="button"
+                onClick={handlePickContact}
+                disabled={isPickingContact}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: 5,
+                  fontSize: '0.74rem',
+                  padding: '4px 9px',
+                  borderRadius: 6,
+                  background: 'rgba(99, 102, 241, 0.15)',
+                  color: 'var(--primary, #6366f1)',
+                  border: '1px solid rgba(99, 102, 241, 0.3)',
+                  cursor: isPickingContact ? 'wait' : 'pointer',
+                  fontWeight: 600,
+                  transition: 'all 0.2s ease',
+                }}
+                title="Pick customer name and number from phonebook"
+              >
+                <BookUser size={13} />
+                <span>{isPickingContact ? 'Opening Contacts...' : 'Choose from Contacts'}</span>
+              </button>
+            </div>
             <div style={{ position: 'relative' }}>
               <input
                 id="phoneNumber"
                 type="tel"
                 inputMode="tel"
                 className={`form-input ${errors.phoneNumber ? 'has-error' : ''}`}
-                placeholder="10-digit mobile number"
+                placeholder="10-digit mobile number or choose above"
                 value={formData.phoneNumber}
                 onChange={(e) => {
                   setFormData({ ...formData, phoneNumber: e.target.value });
