@@ -276,26 +276,35 @@ button, input, select, textarea {
 
 /* Quick Action Banner */
 .quick-action-cta {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 14px 16px;
+  background: linear-gradient(135deg, #18281F 0%, #111A15 100%);
+  border: 1px solid rgba(52, 211, 153, 0.3);
+  border-bottom: 3px solid #065F46;
+  border-radius: var(--radius-lg);
+  padding: 15px 16px;
   display: flex;
   align-items: center;
   justify-content: space-between;
   margin-bottom: 20px;
   cursor: pointer;
-  transition: all 0.15s ease;
-  box-shadow: var(--shadow-sm);
+  transition: all 0.18s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 
+    0 10px 24px -4px rgba(16, 185, 129, 0.2),
+    0 4px 10px rgba(0, 0, 0, 0.5),
+    inset 0 1px 1px rgba(255, 255, 255, 0.2);
 }
 
 .quick-action-cta:hover {
-  border-color: var(--primary);
+  transform: translateY(-2px);
+  border-color: rgba(52, 211, 153, 0.6);
+  box-shadow: 
+    0 14px 30px -4px rgba(16, 185, 129, 0.3),
+    0 6px 14px rgba(0, 0, 0, 0.6),
+    inset 0 1px 1px rgba(255, 255, 255, 0.3);
 }
 
 .quick-action-cta:active {
-  transform: scale(0.99);
-  background-color: var(--bg-surface);
+  transform: translateY(2px);
+  border-bottom-width: 1px;
 }
 
 .cta-left {
@@ -305,11 +314,15 @@ button, input, select, textarea {
 }
 
 .cta-icon-circle {
-  width: 42px;
-  height: 42px;
+  width: 44px;
+  height: 44px;
   border-radius: var(--radius-full);
-  background: rgba(16, 185, 129, 0.15);
-  color: var(--primary);
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.3) 0%, rgba(5, 150, 105, 0.2) 100%);
+  border: 1px solid rgba(52, 211, 153, 0.5);
+  box-shadow: 
+    0 4px 10px rgba(0, 0, 0, 0.4),
+    inset 0 1px 1px rgba(255, 255, 255, 0.35);
+  color: #34D399;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -429,31 +442,42 @@ button, input, select, textarea {
 }
 
 .filter-pill {
-  padding: 7px 14px;
+  padding: 7px 14px 6px 14px;
   border-radius: var(--radius-full);
-  font-size: 0.78rem;
-  font-weight: 500;
-  border: 1px solid var(--border);
-  background: var(--bg-card);
+  font-size: 0.80rem;
+  font-weight: 600;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 2px solid rgba(0, 0, 0, 0.6);
+  background: linear-gradient(180deg, #1A2620 0%, #121A15 100%);
   color: var(--text-secondary);
   cursor: pointer;
   white-space: nowrap;
   display: flex;
   align-items: center;
-  gap: 5px;
-  transition: all 0.15s ease;
+  gap: 6px;
+  transition: all 0.12s ease;
   min-height: 36px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
 }
 
 .filter-pill:hover {
-  border-color: var(--text-secondary);
+  color: var(--text-main);
+  border-color: rgba(255, 255, 255, 0.2);
+  transform: translateY(-1px);
+}
+
+.filter-pill:active {
+  transform: translateY(2px);
+  border-bottom-width: 1px;
 }
 
 .filter-pill.active {
-  background: var(--primary);
-  color: var(--primary-text-dark);
-  border-color: var(--primary);
-  font-weight: 600;
+  background: linear-gradient(180deg, #10B981 0%, #059669 100%);
+  color: #03251E;
+  border: 1px solid #34D399;
+  border-bottom: 3px solid #047857;
+  font-weight: 700;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4), inset 0 1px 1px rgba(255, 255, 255, 0.4);
 }
 
 .filter-pill-badge {
@@ -501,13 +525,30 @@ button, input, select, textarea {
 }
 
 .record-card {
-  background: var(--bg-card);
-  border: 1px solid var(--border);
-  border-radius: var(--radius-md);
-  padding: 11px 13px;
-  box-shadow: var(--shadow-sm);
-  transition: border-color 0.15s ease;
+  background: linear-gradient(165deg, #17241D 0%, #0F1713 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 3px solid rgba(0, 0, 0, 0.6);
+  border-radius: var(--radius-lg);
+  padding: 13px 14px;
+  box-shadow: 
+    0 8px 22px -4px rgba(0, 0, 0, 0.7),
+    0 2px 6px rgba(0, 0, 0, 0.45),
+    inset 0 1px 1px rgba(255, 255, 255, 0.12);
+  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.18s ease;
   position: relative;
+}
+
+.record-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 12px 28px -4px rgba(0, 0, 0, 0.8),
+    0 4px 10px rgba(0, 0, 0, 0.5),
+    inset 0 1px 1px rgba(255, 255, 255, 0.16);
+}
+
+.record-card:active {
+  transform: translateY(2px);
+  border-bottom-width: 1px;
 }
 
 .record-card.overdue-border {
@@ -724,48 +765,54 @@ button, input, select, textarea {
 }
 
 .btn-action-pill {
-  padding: 4px 10px;
+  padding: 5px 12px 4px 12px;
   border-radius: var(--radius-sm);
   font-size: 0.74rem;
-  font-weight: 600;
+  font-weight: 700;
   cursor: pointer;
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 5px;
   min-height: 32px;
   border: 1px solid transparent;
-  transition: all 0.15s ease;
+  border-bottom: 2px solid rgba(0, 0, 0, 0.5);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.15);
+  transition: all 0.12s ease;
   white-space: nowrap;
 }
 
 .btn-action-pill:active {
-  transform: scale(0.95);
+  transform: translateY(2px);
+  border-bottom-width: 1px;
 }
 
 .btn-action-pill.receive {
-  background: var(--status-partial-bg);
-  color: var(--status-partial-text);
-  border-color: var(--status-partial-border);
+  background: linear-gradient(180deg, rgba(59, 130, 246, 0.25) 0%, rgba(37, 99, 235, 0.18) 100%);
+  color: #60A5FA;
+  border-color: rgba(59, 130, 246, 0.45);
+  border-bottom-color: rgba(29, 78, 216, 0.7);
 }
 
 .btn-action-pill.receive:hover {
-  background: rgba(59, 130, 246, 0.22);
+  background: rgba(59, 130, 246, 0.32);
 }
 
 .btn-action-pill.mark-repaid {
-  background: var(--status-paid-bg);
-  color: var(--status-paid-text);
-  border-color: var(--status-paid-border);
+  background: linear-gradient(180deg, rgba(16, 185, 129, 0.25) 0%, rgba(5, 150, 105, 0.18) 100%);
+  color: #34D399;
+  border-color: rgba(16, 185, 129, 0.45);
+  border-bottom-color: rgba(4, 120, 87, 0.7);
 }
 
 .btn-action-pill.mark-repaid:hover {
-  background: rgba(16, 185, 129, 0.22);
+  background: rgba(16, 185, 129, 0.32);
 }
 
 .btn-action-pill.mark-pending {
-  background: var(--bg-surface);
+  background: linear-gradient(180deg, #1C2721 0%, #141E18 100%);
   color: var(--text-secondary);
-  border-color: var(--border);
+  border-color: rgba(255, 255, 255, 0.1);
+  border-bottom-color: rgba(0, 0, 0, 0.6);
 }
 
 .btn-action-pill.mark-pending:hover {
@@ -778,15 +825,22 @@ button, input, select, textarea {
   min-width: 32px;
   min-height: 32px;
   border-radius: var(--radius-sm);
-  border: 1px solid var(--border);
-  background: var(--bg-surface);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 2px solid rgba(0, 0, 0, 0.6);
+  background: linear-gradient(180deg, #1C2822 0%, #141E18 100%);
   color: var(--text-secondary);
   display: flex;
   align-items: center;
   justify-content: center;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.12s ease;
   padding: 0;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.btn-action-icon:active {
+  transform: translateY(2px);
+  border-bottom-width: 1px;
 }
 
 .btn-action-icon:hover {
@@ -1060,45 +1114,64 @@ button, input, select, textarea {
 
 .btn-primary {
   flex: 1;
-  background: var(--primary);
-  color: var(--primary-text-dark);
-  border: none;
-  padding: 13px 20px;
+  background: linear-gradient(180deg, #10B981 0%, #059669 100%);
+  color: #03251E;
+  border: 1px solid #34D399;
+  border-bottom: 4px solid #047857;
+  padding: 12px 20px 10px 20px;
   border-radius: var(--radius-md);
-  font-size: 0.92rem;
-  font-weight: 600;
+  font-size: 0.94rem;
+  font-weight: 700;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
-  box-shadow: var(--shadow-emerald);
-  transition: background-color 0.15s ease, transform 0.1s ease;
+  box-shadow: 
+    0 6px 16px rgba(16, 185, 129, 0.45),
+    inset 0 1px 1px rgba(255, 255, 255, 0.45);
+  transition: all 0.12s ease;
   min-height: 48px;
+  text-shadow: 0 1px 0 rgba(255, 255, 255, 0.3);
 }
 
 .btn-primary:hover {
-  background: var(--primary-hover);
+  background: linear-gradient(180deg, #34D399 0%, #10B981 100%);
+  box-shadow: 
+    0 8px 20px rgba(16, 185, 129, 0.55),
+    inset 0 1px 1px rgba(255, 255, 255, 0.5);
 }
 
 .btn-primary:active {
-  transform: scale(0.98);
+  transform: translateY(3px);
+  border-bottom-width: 1px;
+  box-shadow: 
+    0 2px 6px rgba(16, 185, 129, 0.3),
+    inset 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
 .btn-secondary {
-  background: var(--bg-surface);
+  background: linear-gradient(180deg, #1A251F 0%, #131C17 100%);
   color: var(--text-main);
-  border: 1px solid var(--border);
-  padding: 13px 18px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 3px solid rgba(0, 0, 0, 0.7);
+  padding: 12px 18px 10px 18px;
   border-radius: var(--radius-md);
   font-size: 0.92rem;
-  font-weight: 500;
+  font-weight: 600;
   cursor: pointer;
-  transition: all 0.15s ease;
+  transition: all 0.12s ease;
   min-height: 48px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.btn-secondary:active {
+  transform: translateY(2px);
+  border-bottom-width: 1px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
 }
 
 .btn-secondary:hover {
@@ -1224,17 +1297,30 @@ button, input, select, textarea {
 
 /* Customer Khata Card */
 .customer-khata-card {
-  background: var(--bg-card);
-  border-radius: var(--radius-md);
-  border: 1px solid var(--border);
-  padding: 14px 16px;
-  box-shadow: var(--shadow-sm);
-  transition: border-color 0.15s ease;
+  background: linear-gradient(165deg, #18261F 0%, #101914 100%);
+  border-radius: var(--radius-lg);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-bottom: 3px solid rgba(0, 0, 0, 0.6);
+  padding: 15px 16px;
+  box-shadow: 
+    0 10px 24px -4px rgba(0, 0, 0, 0.75),
+    0 3px 8px rgba(0, 0, 0, 0.45),
+    inset 0 1px 1px rgba(255, 255, 255, 0.15);
+  transition: transform 0.18s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.18s ease;
   cursor: pointer;
 }
 
+.customer-khata-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 14px 30px -4px rgba(0, 0, 0, 0.85),
+    0 5px 12px rgba(0, 0, 0, 0.5),
+    inset 0 1px 1px rgba(255, 255, 255, 0.2);
+}
+
 .customer-khata-card:active {
-  background: var(--bg-surface);
+  transform: translateY(2px);
+  border-bottom-width: 1px;
 }
 
 .customer-khata-card.overdue {
