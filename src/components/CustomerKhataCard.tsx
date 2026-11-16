@@ -93,9 +93,9 @@ export const CustomerKhataCard: React.FC<CustomerKhataCardProps> = ({
             {isSettled ? (
               <span style={{ color: 'var(--primary)', fontWeight: 600 }}>All Settled (₹0)</span>
             ) : net > 0 ? (
-              <span style={{ color: 'var(--status-pending-text)', fontWeight: 600 }}>लेना है (Receivable)</span>
+              <span style={{ color: 'var(--status-pending-text)', fontWeight: 600 }}>Receivable (To Collect)</span>
             ) : (
-              <span style={{ color: '#F87171', fontWeight: 600 }}>देना है (Payable)</span>
+              <span style={{ color: '#F87171', fontWeight: 600 }}>Payable (To Pay)</span>
             )}
           </div>
         </div>
@@ -112,12 +112,12 @@ export const CustomerKhataCard: React.FC<CustomerKhataCardProps> = ({
         {/* Given / Taken badges */}
         {khata.givenRecordsCount > 0 && (
           <span className="customer-stat-pill given" style={{ color: '#34D399', background: 'rgba(16, 185, 129, 0.12)' }}>
-            🟢 {khata.givenRecordsCount} दिया
+            🟢 {khata.givenRecordsCount} Given
           </span>
         )}
         {khata.takenRecordsCount > 0 && (
           <span className="customer-stat-pill taken" style={{ color: '#F87171', background: 'rgba(239, 68, 68, 0.12)' }}>
-            🔴 {khata.takenRecordsCount} लिया
+            🔴 {khata.takenRecordsCount} Borrowed
           </span>
         )}
 

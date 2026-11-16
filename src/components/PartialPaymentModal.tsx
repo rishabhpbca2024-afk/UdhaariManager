@@ -71,9 +71,9 @@ export const PartialPaymentModal: React.FC<PartialPaymentModalProps> = ({
       <div className="modal-content-sheet" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <div>
-            <h2 className="modal-title">{isTaken ? 'Pay Installment (किश्त चुकाएं)' : 'Receive Payment (किश्त प्राप्त करें)'}</h2>
+            <h2 className="modal-title">{isTaken ? 'Pay Installment (Repayment)' : 'Receive Payment'}</h2>
             <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
-              {isTaken ? 'Lender / जिससे लिया: ' : 'Customer / जिसको दिया: '}{record.personName}
+              {isTaken ? 'Lender (Borrowed From): ' : 'Customer (Lent To): '}{record.personName}
             </p>
           </div>
           <button
@@ -130,7 +130,7 @@ export const PartialPaymentModal: React.FC<PartialPaymentModalProps> = ({
           {/* Payment Amount Input */}
           <div className="form-group">
             <label className="form-label" htmlFor="partialAmount">
-              {isTaken ? 'Payment Amount (₹) - मैंने चुकाया' : 'Payment Amount Received (₹) - प्राप्त हुआ'} <span className="required-star">*</span>
+              {isTaken ? 'Payment Amount (₹) - Amount Paid' : 'Payment Amount Received (₹)'} <span className="required-star">*</span>
             </label>
             <div style={{ position: 'relative' }}>
               <input

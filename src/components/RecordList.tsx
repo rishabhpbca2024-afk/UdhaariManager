@@ -240,7 +240,7 @@ export const RecordList: React.FC<RecordListProps> = ({
             className={`filter-pill ${activeFilter === 'given' ? 'active-given' : ''}`}
             onClick={() => onFilterChange('given')}
           >
-            🟢 दिया (Given) <span className="filter-pill-badge">{counts.given}</span>
+            🟢 Given <span className="filter-pill-badge">{counts.given}</span>
           </button>
 
           <button
@@ -248,7 +248,7 @@ export const RecordList: React.FC<RecordListProps> = ({
             className={`filter-pill ${activeFilter === 'taken' ? 'active-taken' : ''}`}
             onClick={() => onFilterChange('taken')}
           >
-            🔴 लिया (Taken) <span className="filter-pill-badge">{counts.taken}</span>
+            🔴 Borrowed <span className="filter-pill-badge">{counts.taken}</span>
           </button>
 
           <button

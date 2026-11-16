@@ -188,8 +188,8 @@ export const UdhaariFormModal: React.FC<UdhaariFormModalProps> = ({
           <div className="modal-header">
             <h2 className="modal-title">
               {isEditing
-                ? (isTaken ? 'उधार लिया एडिट करें' : 'उधार दिया एडिट करें')
-                : (isTaken ? 'नया उधार लिया (Borrowed)' : 'नया उधार दिया (Lent)')}
+                ? (isTaken ? 'Edit Borrowed Record' : 'Edit Credit Record')
+                : (isTaken ? 'Record Borrowed Money' : 'Record Credit Given')}
             </h2>
             <button
               type="button"
@@ -202,7 +202,7 @@ export const UdhaariFormModal: React.FC<UdhaariFormModalProps> = ({
           </div>
 
           <form onSubmit={handleSubmit} noValidate>
-            {/* Type Selector (मैंने दिया vs मैंने लिया) */}
+            {/* Type Selector (Given vs Taken) */}
             <div className="type-toggle-container">
               <button
                 type="button"
@@ -210,7 +210,7 @@ export const UdhaariFormModal: React.FC<UdhaariFormModalProps> = ({
                 onClick={() => setFormData({ ...formData, type: 'given' })}
               >
                 <ArrowUpRight size={18} />
-                <span>मैंने दिया (Lent)</span>
+                <span>Given (Lent)</span>
               </button>
               <button
                 type="button"
@@ -218,21 +218,21 @@ export const UdhaariFormModal: React.FC<UdhaariFormModalProps> = ({
                 onClick={() => setFormData({ ...formData, type: 'taken' })}
               >
                 <ArrowDownLeft size={18} />
-                <span>मैंने लिया (Borrowed)</span>
+                <span>Taken (Borrowed)</span>
               </button>
             </div>
 
             {/* Person's Name */}
             <div className="form-group">
               <label className="form-label" htmlFor="personName" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                <span>{isTaken ? 'किससे लिया (Lender Name)' : 'ग्राहक का नाम (Borrower Name)'}</span>
+                <span>{isTaken ? 'Lender Name (Borrowed From)' : 'Customer Name (Lent To)'}</span>
                 <span className="required-star">*</span>
               </label>
               <input
                 id="personName"
                 type="text"
                 className={`form-input ${errors.personName ? 'has-error' : ''}`}
-                placeholder={isTaken ? 'उदा. रोहित, शर्मा जी...' : 'उदा. रमेश कुमार, अमन शर्मा...'}
+                placeholder={isTaken ? 'e.g. Rohit, Sharma Ji...' : 'e.g. Ramesh Kumar, Aman Sharma...'}
                 value={formData.personName}
                 onChange={(e) => {
                   setFormData({ ...formData, personName: e.target.value });
@@ -248,7 +248,7 @@ export const UdhaariFormModal: React.FC<UdhaariFormModalProps> = ({
             {/* Amount in Rupees */}
             <div className="form-group">
               <label className="form-label" htmlFor="amountRupees" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                <span>{isTaken ? 'उधार ली गई राशि (₹)' : 'उधार दी गई राशि (₹)'}</span>
+                <span>{isTaken ? 'Borrowed Amount (₹)' : 'Credit Amount (₹)'}</span>
                 <span className="required-star">*</span>
               </label>
               <div style={{ position: 'relative' }}>
@@ -443,8 +443,8 @@ export const UdhaariFormModal: React.FC<UdhaariFormModalProps> = ({
                     : isEditing
                     ? 'Update Record'
                     : isTaken
-                    ? 'सेव करें (मैंने लिया)'
-                    : 'सेव करें (मैंने दिया)'}
+                    ? 'Save Borrowed Record'
+                    : 'Save Credit Record'}
                 </span>
               </button>
             </div>

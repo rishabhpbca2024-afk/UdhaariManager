@@ -64,19 +64,19 @@ export const Dashboard: React.FC<DashboardProps> = ({
               <Scale size={20} />
             </div>
             <div>
-              <span className="balance-hero-subtitle">Net Financial Standing • कुल हिसाब</span>
+              <span className="balance-hero-subtitle">Net Financial Standing</span>
               <div className="balance-hero-status-pill">
                 {netBalance > 0 ? (
                   <span className="net-pill positive">
-                    <ArrowUpRight size={13} /> आपको ₹{formatINR(netBalance).replace('₹', '')} कुल लेना बाकी है
+                    <ArrowUpRight size={13} /> You are to receive {formatINR(netBalance)} (Net Receivable)
                   </span>
                 ) : netBalance < 0 ? (
                   <span className="net-pill negative">
-                    <ArrowDownLeft size={13} /> आपको ₹{formatINR(Math.abs(netBalance)).replace('₹', '')} कुल देना बाकी है
+                    <ArrowDownLeft size={13} /> You have to pay {formatINR(Math.abs(netBalance))} (Net Payable)
                   </span>
                 ) : (
                   <span className="net-pill neutral">
-                    <ShieldCheck size={13} /> हिसाब बराबर है (No Net Dues)
+                    <ShieldCheck size={13} /> All Settled (No Net Dues)
                   </span>
                 )}
               </div>
@@ -89,55 +89,55 @@ export const Dashboard: React.FC<DashboardProps> = ({
             {formatINR(Math.abs(netBalance))}
           </div>
           <div className={`balance-hero-badge-tag ${netBalance > 0 ? 'badge-given' : netBalance < 0 ? 'badge-taken' : 'badge-neutral'}`}>
-            {netBalance > 0 ? '🟢 नेट लेना है' : netBalance < 0 ? '🔴 नेट देना है' : '⚪ बराबर'}
+            {netBalance > 0 ? '🟢 Net Receivable' : netBalance < 0 ? '🔴 Net Payable' : '⚪ Balanced'}
           </div>
         </div>
 
-        {/* 3D Dual Receivable (दिया) & Payable (लिया) Cards */}
+        {/* 3D Dual Receivable (Given) & Payable (Borrowed) Cards */}
         <div className="balance-dual-grid">
-          {/* Given Card (लेना है) */}
+          {/* Given Card (Receivable) */}
           <div
             className="card-3d dual-card given-card"
             onClick={() => onFilterSelect('given')}
             role="button"
             tabIndex={0}
-            title="Click to view all given credits (लेना है)"
+            title="Click to view all given credits (Receivable)"
           >
             <div className="dual-card-header">
               <div className="dual-icon-badge given-badge">
                 <ArrowUpRight size={16} />
               </div>
-              <span className="dual-title">कुल लेना है (Given)</span>
+              <span className="dual-title">Total Receivable (Given)</span>
             </div>
             <div className="dual-amount given-amount">
               {formatINR(metrics.totalGivenOutstandingPaise || 0)}
             </div>
             <div className="dual-footer">
-              <span>{metrics.givenCount || 0} दिए गए उधार</span>
-              <span className="dual-action-arrow">देखें →</span>
+              <span>{metrics.givenCount || 0} Loans Given</span>
+              <span className="dual-action-arrow">View →</span>
             </div>
           </div>
 
-          {/* Taken Card (देना है) */}
+          {/* Taken Card (Payable) */}
           <div
             className="card-3d dual-card taken-card"
             onClick={() => onFilterSelect('taken')}
             role="button"
             tabIndex={0}
-            title="Click to view all taken credits (देना है)"
+            title="Click to view all borrowed credits (Payable)"
           >
             <div className="dual-card-header">
               <div className="dual-icon-badge taken-badge">
                 <ArrowDownLeft size={16} />
               </div>
-              <span className="dual-title">कुल देना है (Taken)</span>
+              <span className="dual-title">Total Payable (Borrowed)</span>
             </div>
             <div className="dual-amount taken-amount">
               {formatINR(metrics.totalTakenOutstandingPaise || 0)}
             </div>
             <div className="dual-footer">
-              <span>{metrics.takenCount || 0} लिए गए उधार</span>
-              <span className="dual-action-arrow">देखें →</span>
+              <span>{metrics.takenCount || 0} Loans Borrowed</span>
+              <span className="dual-action-arrow">View →</span>
             </div>
           </div>
         </div>
@@ -214,7 +214,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
           </div>
           <div>
             <div className="cta-text-title">Record New Credit / Debit</div>
-            <div className="cta-text-subtitle">मैंने दिया (Lent) या मैंने लिया (Borrowed) दर्ज करें</div>
+            <div className="cta-text-subtitle">Record money lent (Given) or borrowed (Taken)</div>
           </div>
         </div>
         <ChevronRight size={18} color="var(--text-secondary)" />
@@ -262,7 +262,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                         {record.personName}
                       </span>
                       <span className={`record-type-badge ${isTaken ? 'type-taken' : 'type-given'}`}>
-                        {isTaken ? '🔴 लिया' : '🟢 दिया'}
+                        {isTaken ? '🔴 Borrowed' : '🟢 Lent'}
                       </span>
                     </div>
                     <div style={{ fontSize: '0.74rem', color: 'var(--status-overdue-text)', marginTop: 2 }}>
@@ -347,7 +347,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
                         {record.personName}
                       </span>
                       <span className={`record-type-badge ${isTaken ? 'type-taken' : 'type-given'}`}>
-                        {isTaken ? '🔴 लिया' : '🟢 दिया'}
+                        {isTaken ? '🔴 Borrowed' : '🟢 Lent'}
                       </span>
                       {hasMultiple && (
                         <span

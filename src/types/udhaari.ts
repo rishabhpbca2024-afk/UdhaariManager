@@ -12,7 +12,7 @@ export interface UdhaariRecord {
   id: string;
   personId?: string; // Stable identifier for person/customer
   personName: string;
-  type?: UdhaariType; // 'given' (मैंने दिया / Lent) or 'taken' (मैंने लिया / Borrowed), default 'given'
+  type?: UdhaariType; // 'given' (Lent / Receivable) or 'taken' (Borrowed / Payable), default 'given'
   amountPaise: number; // Stored as integer in paise (e.g. ₹500.00 = 50000)
   paidPaise: number; // Amount repaid so far in paise (default 0)
   paymentHistory: PaymentEntry[];
@@ -52,8 +52,8 @@ export type SortField = 'newest' | 'oldest' | 'dueDate' | 'amountDesc' | 'amount
 
 export interface DashboardMetrics {
   totalOutstandingPaise: number; // (amountPaise - paidPaise) for all non-repaid records
-  totalGivenOutstandingPaise: number; // Total to receive (मैंने दिया - लेना है)
-  totalTakenOutstandingPaise: number; // Total to pay (मैंने लिया - देना है)
+  totalGivenOutstandingPaise: number; // Total to receive (Given / Receivable)
+  totalTakenOutstandingPaise: number; // Total to pay (Borrowed / Payable)
   netBalancePaise: number; // totalGivenOutstandingPaise - totalTakenOutstandingPaise
   givenCount: number;
   takenCount: number;

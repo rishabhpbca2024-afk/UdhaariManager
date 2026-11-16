@@ -385,12 +385,12 @@ const replacedList = [...backupToRestore];
 assert(replacedList.length === 2, 'Replace contains exactly the 2 records from backup');
 assert(!replacedList.some((r) => r.id === 'rec-2'), 'Old records not in backup are replaced in replace mode');
 
-console.log('\n--- TEST 12: Dual Udhaari (मैंने दिया vs मैंने लिया) & Net Balance Calculations ---');
+console.log('\n--- TEST 12: Dual Udhaari (Given vs Taken) & Net Balance Calculations ---');
 const dualRecords: UdhaariRecord[] = [
   {
     id: 'd-1',
     personName: 'Vikram',
-    type: 'given', // मैंने दिया (₹5,000 lena hai)
+    type: 'given', // Lent (₹5,000 receivable)
     amountPaise: 500000,
     paidPaise: 100000, // ₹4,000 remaining
     paymentHistory: [],
@@ -406,7 +406,7 @@ const dualRecords: UdhaariRecord[] = [
   {
     id: 'd-2',
     personName: 'Vikram',
-    type: 'taken', // मैंने लिया (₹1,500 dena hai)
+    type: 'taken', // Borrowed (₹1,500 payable)
     amountPaise: 150000,
     paidPaise: 0, // ₹1,500 remaining
     paymentHistory: [],
@@ -422,7 +422,7 @@ const dualRecords: UdhaariRecord[] = [
   {
     id: 'd-3',
     personName: 'Sunita',
-    type: 'taken', // मैंने लिया (₹2,000 dena hai)
+    type: 'taken', // Borrowed (₹2,000 payable)
     amountPaise: 200000,
     paidPaise: 50000, // ₹1,500 remaining
     paymentHistory: [],

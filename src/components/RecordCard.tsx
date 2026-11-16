@@ -75,7 +75,7 @@ export const RecordCard: React.FC<RecordCardProps> = ({
             </h3>
             <span className={`record-type-badge ${isTaken ? 'type-taken' : 'type-given'}`}>
               {isTaken ? <ArrowDownLeft size={10} /> : <ArrowUpRight size={10} />}
-              <span>{isTaken ? 'मैंने लिया' : 'मैंने दिया'}</span>
+              <span>{isTaken ? 'Borrowed' : 'Lent'}</span>
             </span>
             {customerGrandTotal && customerGrandTotal.count > 1 && (
               <span
@@ -181,7 +181,7 @@ export const RecordCard: React.FC<RecordCardProps> = ({
               type="button"
               className={`btn-action-pill ${isTaken ? 'pay' : 'receive'}`}
               onClick={() => onOpenPartialPayment(record)}
-              title={isTaken ? 'Pay Installment (किश्त दें)' : 'Receive Payment (किश्त लें)'}
+              title={isTaken ? 'Pay Installment' : 'Receive Payment'}
             >
               <Split size={13} />
               <span>{isTaken ? 'Pay' : 'Receive'}</span>

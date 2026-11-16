@@ -201,7 +201,7 @@ export async function updateRecord(
 }
 
 /**
- * Records a partial repayment (आधे पैसे वापस दिए हो तो)
+ * Records a partial repayment (installment paid/received)
  * Allows extending the due date for the remaining balance.
  */
 export async function recordPartialPayment(
@@ -290,7 +290,7 @@ export async function settleAllDuesForCustomer(
   personName: string,
   personId?: string,
   settlementDate: string = getTodayDateString(),
-  notes: string = 'Sabhi hisab chukta (Full settlement)'
+  notes: string = 'Full settlement of all dues'
 ): Promise<SettleAllDuesResult> {
   await initializeDatabase();
   const allRecords = await getAllRecords();

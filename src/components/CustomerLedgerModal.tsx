@@ -134,10 +134,10 @@ export const CustomerLedgerModal: React.FC<CustomerLedgerModalProps> = ({
           <div className="ledger-summary-metric">
             <span className="ledger-metric-label">
               {khata.netRemainingPaise > 0
-                ? 'नेट लेना है (Net Receivable)'
+                ? 'Net Receivable (To Collect)'
                 : khata.netRemainingPaise < 0
-                ? 'नेट देना है (Net Payable)'
-                : 'नेट बैलेंस (Net Balance)'}
+                ? 'Net Payable (To Pay)'
+                : 'Net Balance'}
             </span>
             <span
               className="ledger-metric-value"
@@ -156,13 +156,13 @@ export const CustomerLedgerModal: React.FC<CustomerLedgerModalProps> = ({
 
           <div className="ledger-summary-grid">
             <div className="ledger-sub-stat">
-              <span className="sub-stat-lbl">🟢 दिया (Lent)</span>
+              <span className="sub-stat-lbl">🟢 Given (Lent)</span>
               <span className="sub-stat-val" style={{ color: '#34D399' }}>
                 {formatINR(khata.totalGivenPaise ?? khata.totalUdhaarPaise)}
               </span>
             </div>
             <div className="ledger-sub-stat">
-              <span className="sub-stat-lbl">🔴 लिया (Taken)</span>
+              <span className="sub-stat-lbl">🔴 Borrowed</span>
               <span className="sub-stat-val" style={{ color: '#F87171' }}>
                 {formatINR(khata.totalTakenPaise ?? 0)}
               </span>
