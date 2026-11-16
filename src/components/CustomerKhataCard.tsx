@@ -26,7 +26,8 @@ export const CustomerKhataCard: React.FC<CustomerKhataCardProps> = ({
   onAddUdhaarForCustomer,
   onOpenSettleAll,
 }) => {
-  const isSettled = khata.remainingPaise === 0;
+  const net = khata.netRemainingPaise !== undefined ? khata.netRemainingPaise : khata.remainingPaise;
+  const isSettled = net === 0 && khata.remainingPaise === 0;
   const hasOverdue = khata.overdueCount > 0;
   const cleanPhone = khata.phoneNumber ? khata.phoneNumber.replace(/[^0-9+]/g, '') : '';
 
@@ -37,16 +38,17 @@ export const CustomerKhataCard: React.FC<CustomerKhataCardProps> = ({
     e.stopPropagation();
     if (!cleanPhone) return;
 
-    const remainingStr = formatINR(khata.remainingPaise);
+    const remainingStr = formatINR(Math.abs(net));
+    const isReceivable = net >= 0;
     const message = encodeURIComponent(
-      `Hello ${khata.personName},\n\nThis is a friendly reminder that you have an outstanding credit balance of ${remainingStr} across ${khata.recordsCount} loan(s) in our ledger.\n\nPlease settle at your convenience. Thank you!\n- Udhaari Manager Ledger`
+      `Hello ${khata.personName},\n\nThis is a friendly update regarding our khata ledger. Current balance is ${remainingStr} (${isReceivable ? 'You have to pay' : 'I have to pay'}) across ${khata.recordsCount} transaction(s).\n\nThank you!\n- Udhaari Manager`
     );
     window.open(`https://wa.me/${cleanPhone.replace('+', '')}?text=${message}`, '_blank');
   };
 
   return (
     <div
-      className={`customer-khata-card ${isSettled ? 'settled' : hasOverdue ? 'overdue' : 'active'}`}
+      className={`customer-khata-card card-3d ${isSettled ? 'settled' : hasOverdue ? 'overdue' : 'active'}`}
       onClick={() => onViewLedger(khata)}
     >
       {/* Top Header: Avatar, Name, Phone & Total Balance */}
@@ -83,15 +85,17 @@ export const CustomerKhataCard: React.FC<CustomerKhataCardProps> = ({
         <div className="customer-balance-right">
           <div
             className="customer-remaining-amount"
-            style={{ color: isSettled ? 'var(--primary)' : hasOverdue ? 'var(--status-overdue-text)' : 'var(--text-main)' }}
+            style={{ color: isSettled ? 'var(--primary)' : net > 0 ? 'var(--status-pending-text)' : '#F87171' }}
           >
-            {formatINR(khata.remainingPaise)}
+            {formatINR(Math.abs(net))}
           </div>
           <div className="customer-remaining-label">
             {isSettled ? (
               <span style={{ color: 'var(--primary)', fontWeight: 600 }}>All Settled (₹0)</span>
+            ) : net > 0 ? (
+              <span style={{ color: 'var(--status-pending-text)', fontWeight: 600 }}>लेना है (Receivable)</span>
             ) : (
-              <span>Outstanding Balance</span>
+              <span style={{ color: '#F87171', fontWeight: 600 }}>देना है (Payable)</span>
             )}
           </div>
         </div>
@@ -102,8 +106,20 @@ export const CustomerKhataCard: React.FC<CustomerKhataCardProps> = ({
         {/* Total Entries Count */}
         <span className="customer-stat-pill entries">
           <Layers size={12} />
-          <span>{khata.recordsCount} {khata.recordsCount === 1 ? 'Loan' : 'Loans'}</span>
+          <span>{khata.recordsCount} Entries</span>
         </span>
+
+        {/* Given / Taken badges */}
+        {khata.givenRecordsCount > 0 && (
+          <span className="customer-stat-pill given" style={{ color: '#34D399', background: 'rgba(16, 185, 129, 0.12)' }}>
+            🟢 {khata.givenRecordsCount} दिया
+          </span>
+        )}
+        {khata.takenRecordsCount > 0 && (
+          <span className="customer-stat-pill taken" style={{ color: '#F87171', background: 'rgba(239, 68, 68, 0.12)' }}>
+            🔴 {khata.takenRecordsCount} लिया
+          </span>
+        )}
 
         {/* Overdue alert badge if any */}
         {hasOverdue && (

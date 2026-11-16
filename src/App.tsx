@@ -286,7 +286,7 @@ export const App: React.FC = () => {
   };
 
   // Quick jump from Dashboard filter clicks
-  const handleDashboardFilterSelect = (filter: 'pending' | 'partial' | 'overdue' | 'repaid') => {
+  const handleDashboardFilterSelect = (filter: StatusFilter) => {
     setActiveFilter(filter);
     setActiveTab('records');
   };

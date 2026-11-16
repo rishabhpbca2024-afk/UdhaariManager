@@ -1,6 +1,5 @@
 import React from 'react';
 import {
-  TrendingUp,
   AlertCircle,
   CheckCircle2,
   PlusCircle,
@@ -8,6 +7,9 @@ import {
   ShieldCheck,
   UserX,
   Users,
+  ArrowUpRight,
+  ArrowDownLeft,
+  Scale,
 } from 'lucide-react';
 import type { DashboardMetrics, UdhaariRecord } from '../types/udhaari';
 import { formatINR } from '../utils/currency';
@@ -18,7 +20,7 @@ interface DashboardProps {
   metrics: DashboardMetrics;
   records: UdhaariRecord[];
   onAddClick: () => void;
-  onFilterSelect: (filter: 'pending' | 'partial' | 'overdue' | 'repaid') => void;
+  onFilterSelect: (filter: any) => void;
   onEditRecord: (record: UdhaariRecord) => void;
   onToggleRepaid: (record: UdhaariRecord) => void;
   onOpenPartialPayment: (record: UdhaariRecord) => void;
@@ -37,7 +39,7 @@ export const Dashboard: React.FC<DashboardProps> = ({
     (r) => r.status !== 'repaid' && r.dueDate && isDueDatePassed(r.dueDate)
   );
 
-  // Exact count of unique customers who currently owe money (pending balance > 0)
+  // Exact count of unique parties who currently have active balance
   const debtorCustomerCount = React.useMemo(() => {
     const set = new Set<string>();
     for (const r of records) {
@@ -50,38 +52,107 @@ export const Dashboard: React.FC<DashboardProps> = ({
     return set.size;
   }, [records]);
 
+  const netBalance = metrics.netBalancePaise ?? (metrics.totalGivenOutstandingPaise - metrics.totalTakenOutstandingPaise);
+
   return (
     <div className="dashboard-container">
-      {/* Main Metric Card */}
-      <div className="metric-grid">
-        <div className="metric-card-main">
-          <div className="main-metric-label">
-            <TrendingUp size={18} color="var(--primary)" />
-            <span>Total Outstanding</span>
-          </div>
-          <div className="main-metric-value">
-            {formatINR(metrics.totalOutstandingPaise)}
-          </div>
-          <div className="main-metric-footer">
-            <span style={{ fontWeight: 600, fontSize: '0.82rem', color: 'var(--primary)' }}>
-              👥 {debtorCustomerCount} customer{debtorCustomerCount === 1 ? '' : 's'} with balance
-            </span>
-            <span style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-              <ShieldCheck size={14} color="var(--primary)" /> 100% Offline & Private
-            </span>
+      {/* 3D Net Position Hero Card */}
+      <div className="card-3d balance-hero-card">
+        <div className="balance-hero-header">
+          <div className="balance-hero-title-wrap">
+            <div className="icon-3d-bubble balance-bubble">
+              <Scale size={20} />
+            </div>
+            <div>
+              <span className="balance-hero-subtitle">Net Financial Standing • कुल हिसाब</span>
+              <div className="balance-hero-status-pill">
+                {netBalance > 0 ? (
+                  <span className="net-pill positive">
+                    <ArrowUpRight size={13} /> आपको ₹{formatINR(netBalance).replace('₹', '')} कुल लेना बाकी है
+                  </span>
+                ) : netBalance < 0 ? (
+                  <span className="net-pill negative">
+                    <ArrowDownLeft size={13} /> आपको ₹{formatINR(Math.abs(netBalance)).replace('₹', '')} कुल देना बाकी है
+                  </span>
+                ) : (
+                  <span className="net-pill neutral">
+                    <ShieldCheck size={13} /> हिसाब बराबर है (No Net Dues)
+                  </span>
+                )}
+              </div>
+            </div>
           </div>
         </div>
 
+        <div className="balance-hero-amount-row">
+          <div className={`balance-hero-value ${netBalance > 0 ? 'net-positive' : netBalance < 0 ? 'net-negative' : 'net-zero'}`}>
+            {formatINR(Math.abs(netBalance))}
+          </div>
+          <div className={`balance-hero-badge-tag ${netBalance > 0 ? 'badge-given' : netBalance < 0 ? 'badge-taken' : 'badge-neutral'}`}>
+            {netBalance > 0 ? '🟢 नेट लेना है' : netBalance < 0 ? '🔴 नेट देना है' : '⚪ बराबर'}
+          </div>
+        </div>
+
+        {/* 3D Dual Receivable (दिया) & Payable (लिया) Cards */}
+        <div className="balance-dual-grid">
+          {/* Given Card (लेना है) */}
+          <div
+            className="card-3d dual-card given-card"
+            onClick={() => onFilterSelect('given')}
+            role="button"
+            tabIndex={0}
+            title="Click to view all given credits (लेना है)"
+          >
+            <div className="dual-card-header">
+              <div className="dual-icon-badge given-badge">
+                <ArrowUpRight size={16} />
+              </div>
+              <span className="dual-title">कुल लेना है (Given)</span>
+            </div>
+            <div className="dual-amount given-amount">
+              {formatINR(metrics.totalGivenOutstandingPaise || 0)}
+            </div>
+            <div className="dual-footer">
+              <span>{metrics.givenCount || 0} दिए गए उधार</span>
+              <span className="dual-action-arrow">देखें →</span>
+            </div>
+          </div>
+
+          {/* Taken Card (देना है) */}
+          <div
+            className="card-3d dual-card taken-card"
+            onClick={() => onFilterSelect('taken')}
+            role="button"
+            tabIndex={0}
+            title="Click to view all taken credits (देना है)"
+          >
+            <div className="dual-card-header">
+              <div className="dual-icon-badge taken-badge">
+                <ArrowDownLeft size={16} />
+              </div>
+              <span className="dual-title">कुल देना है (Taken)</span>
+            </div>
+            <div className="dual-amount taken-amount">
+              {formatINR(metrics.totalTakenOutstandingPaise || 0)}
+            </div>
+            <div className="dual-footer">
+              <span>{metrics.takenCount || 0} लिए गए उधार</span>
+              <span className="dual-action-arrow">देखें →</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Sub Metric Grid: Active Accounts, Overdue, Settled */}
+      <div className="metric-grid" style={{ marginTop: 12 }}>
         {/* Sub Card 1: Active Debtors Count */}
         <div
-          className="metric-card-sub"
+          className="metric-card-sub card-3d"
           onClick={() => onFilterSelect('pending')}
           style={{ cursor: 'pointer' }}
         >
           <div className="metric-sub-header">
-            <span className="metric-sub-title">
-              Active Debtors
-            </span>
+            <span className="metric-sub-title">Active Accounts</span>
             <div className="metric-sub-icon-wrap" style={{ background: 'rgba(16, 185, 129, 0.15)', color: 'var(--primary)' }}>
               <Users size={16} />
             </div>
@@ -90,13 +161,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
             {debtorCustomerCount}
           </div>
           <div className="metric-sub-count">
-            Customers with pending balance
+            Parties with active balance
           </div>
         </div>
 
         {/* Sub Card 2: Overdue Amount */}
         <div
-          className="metric-card-sub"
+          className="metric-card-sub card-3d"
           onClick={() => onFilterSelect('overdue')}
           style={{ cursor: 'pointer' }}
         >
@@ -116,12 +187,12 @@ export const Dashboard: React.FC<DashboardProps> = ({
 
         {/* Sub Card 3: Total Repaid */}
         <div
-          className="metric-card-sub"
+          className="metric-card-sub card-3d"
           onClick={() => onFilterSelect('repaid')}
           style={{ cursor: 'pointer', gridColumn: 'span 2' }}
         >
           <div className="metric-sub-header">
-            <span className="metric-sub-title">Total Collected</span>
+            <span className="metric-sub-title">Total Settled / Collected</span>
             <div className="metric-sub-icon-wrap" style={{ background: 'rgba(16, 185, 129, 0.15)', color: 'var(--primary)' }}>
               <CheckCircle2 size={16} />
             </div>
@@ -135,15 +206,15 @@ export const Dashboard: React.FC<DashboardProps> = ({
         </div>
       </div>
 
-      {/* Prominent Quick Action Button */}
-      <div className="quick-action-cta" onClick={onAddClick}>
+      {/* Prominent 3D Quick Action Button */}
+      <div className="quick-action-cta card-3d" onClick={onAddClick}>
         <div className="cta-left">
           <div className="cta-icon-circle">
             <PlusCircle size={22} />
           </div>
           <div>
-            <div className="cta-text-title">Record New Credit</div>
-            <div className="cta-text-subtitle">Enter customer name, amount, and due date</div>
+            <div className="cta-text-title">Record New Credit / Debit</div>
+            <div className="cta-text-subtitle">मैंने दिया (Lent) या मैंने लिया (Borrowed) दर्ज करें</div>
           </div>
         </div>
         <ChevronRight size={18} color="var(--text-secondary)" />
@@ -165,41 +236,50 @@ export const Dashboard: React.FC<DashboardProps> = ({
               View All
             </button>
           </div>
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-            {overdueRecords.slice(0, 3).map((record) => (
-              <div
-                key={record.id}
-                onClick={() => onEditRecord(record)}
-                style={{
-                  background: 'var(--bg-card)',
-                  border: '1px solid var(--border)',
-                  borderLeft: '4px solid var(--status-overdue)',
-                  borderRadius: 'var(--radius-md)',
-                  padding: '12px 14px',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'space-between',
-                  cursor: 'pointer',
-                }}
-              >
-                <div>
-                  <div style={{ fontWeight: 600, color: 'var(--text-main)', fontSize: '0.92rem' }}>
-                    {record.personName}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
+            {overdueRecords.slice(0, 3).map((record) => {
+              const isTaken = record.type === 'taken';
+              return (
+                <div
+                  key={record.id}
+                  onClick={() => onEditRecord(record)}
+                  className="card-3d"
+                  style={{
+                    background: 'var(--bg-card)',
+                    border: '1px solid var(--border)',
+                    borderLeft: `4px solid ${isTaken ? 'var(--status-overdue)' : 'var(--status-pending)'}`,
+                    borderRadius: 'var(--radius-md)',
+                    padding: '12px 14px',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    cursor: 'pointer',
+                  }}
+                >
+                  <div>
+                    <div style={{ display: 'flex', alignItems: 'center', gap: 6 }}>
+                      <span style={{ fontWeight: 600, color: 'var(--text-main)', fontSize: '0.92rem' }}>
+                        {record.personName}
+                      </span>
+                      <span className={`record-type-badge ${isTaken ? 'type-taken' : 'type-given'}`}>
+                        {isTaken ? '🔴 लिया' : '🟢 दिया'}
+                      </span>
+                    </div>
+                    <div style={{ fontSize: '0.74rem', color: 'var(--status-overdue-text)', marginTop: 2 }}>
+                      Due: {record.dueDate ? formatDisplayDate(record.dueDate) : 'Overdue'}
+                    </div>
                   </div>
-                  <div style={{ fontSize: '0.74rem', color: 'var(--status-overdue-text)', marginTop: 2 }}>
-                    Due: {record.dueDate ? formatDisplayDate(record.dueDate) : 'Overdue'}
+                  <div style={{ textAlign: 'right' }}>
+                    <div style={{ fontWeight: 700, color: 'var(--status-overdue-text)', fontSize: '1rem' }}>
+                      {formatINR(record.amountPaise - (record.paidPaise || 0))}
+                    </div>
+                    <span style={{ fontSize: '0.68rem', color: 'var(--status-overdue-text)', fontWeight: 600, textTransform: 'uppercase' }}>
+                      Overdue
+                    </span>
                   </div>
                 </div>
-                <div style={{ textAlign: 'right' }}>
-                  <div style={{ fontWeight: 700, color: 'var(--status-overdue-text)', fontSize: '1rem' }}>
-                    {formatINR(record.amountPaise - (record.paidPaise || 0))}
-                  </div>
-                  <span style={{ fontSize: '0.68rem', color: 'var(--status-overdue-text)', fontWeight: 600, textTransform: 'uppercase' }}>
-                    Overdue
-                  </span>
-                </div>
-              </div>
-            ))}
+              );
+            })}
           </div>
         </div>
       )}
@@ -237,8 +317,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
             </button>
           </div>
         ) : (
-          <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
+          <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
             {records.slice(0, 5).map((record) => {
+              const isTaken = record.type === 'taken';
               const remaining = Math.max(0, (record.amountPaise || 0) - (record.paidPaise || 0));
               const summary = getCustomerSummary(records, record.personName);
               const hasMultiple = summary && summary.recordsCount > 1;
@@ -247,9 +328,11 @@ export const Dashboard: React.FC<DashboardProps> = ({
                 <div
                   key={record.id}
                   onClick={() => onEditRecord(record)}
+                  className="card-3d"
                   style={{
                     background: 'var(--bg-card)',
                     border: '1px solid var(--border)',
+                    borderLeft: `4px solid ${isTaken ? '#F87171' : 'var(--primary)'}`,
                     borderRadius: 'var(--radius-md)',
                     padding: '12px 14px',
                     display: 'flex',
@@ -262,6 +345,9 @@ export const Dashboard: React.FC<DashboardProps> = ({
                     <div style={{ display: 'flex', alignItems: 'center', gap: 6, flexWrap: 'wrap' }}>
                       <span style={{ fontWeight: 600, fontSize: '0.90rem', color: 'var(--text-main)' }}>
                         {record.personName}
+                      </span>
+                      <span className={`record-type-badge ${isTaken ? 'type-taken' : 'type-given'}`}>
+                        {isTaken ? '🔴 लिया' : '🟢 दिया'}
                       </span>
                       {hasMultiple && (
                         <span
@@ -288,13 +374,13 @@ export const Dashboard: React.FC<DashboardProps> = ({
                       )}
                     </div>
                     <div style={{ fontSize: '0.74rem', color: 'var(--text-secondary)', marginTop: 2 }}>
-                      Given: {formatDisplayDate(record.dateGiven)}
+                      {isTaken ? 'Taken: ' : 'Given: '}{formatDisplayDate(record.dateGiven)}
                       {record.status === 'partial' && ` • Balance: ${formatINR(remaining)}`}
                     </div>
                   </div>
 
                   <div style={{ textAlign: 'right', flexShrink: 0 }}>
-                    <div style={{ fontWeight: 700, fontSize: '0.95rem', color: record.status === 'repaid' ? 'var(--primary)' : 'var(--text-main)' }}>
+                    <div style={{ fontWeight: 700, fontSize: '0.95rem', color: record.status === 'repaid' ? 'var(--primary)' : isTaken ? '#F87171' : 'var(--text-main)' }}>
                       {formatINR(record.amountPaise)}
                     </div>
                     <span

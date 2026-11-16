@@ -74,6 +74,7 @@ export async function createRecord(
   const personId = data.personId || getStablePersonId(data.personName, data.phoneNumber);
   const newRecord: UdhaariRecord = {
     ...data,
+    type: data.type || 'given',
     personId,
     paidPaise: data.paidPaise || 0,
     paymentHistory: data.paymentHistory || [],
@@ -85,12 +86,13 @@ export async function createRecord(
   if (isNativePlatform()) {
     await executeRun(
       `INSERT INTO udhaari_records (
-        id, person_id, person_name, amount_paise, paid_paise, payment_history, date_given, due_date, phone_number, notes, status, repaid_date, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
+        id, person_id, person_name, type, amount_paise, paid_paise, payment_history, date_given, due_date, phone_number, notes, status, repaid_date, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
       [
         newRecord.id,
         newRecord.personId || null,
         newRecord.personName,
+        newRecord.type || 'given',
         newRecord.amountPaise,
         newRecord.paidPaise,
         JSON.stringify(newRecord.paymentHistory),
@@ -157,6 +159,7 @@ export async function updateRecord(
       `UPDATE udhaari_records SET
         person_id = ?,
         person_name = ?,
+        type = ?,
         amount_paise = ?,
         paid_paise = ?,
         payment_history = ?,
@@ -171,6 +174,7 @@ export async function updateRecord(
       [
         updated.personId || null,
         updated.personName,
+        updated.type || 'given',
         updated.amountPaise,
         updated.paidPaise,
         JSON.stringify(updated.paymentHistory || []),
@@ -451,12 +455,13 @@ export async function importRecords(
       if (isNativePlatform()) {
         await executeRun(
           `INSERT INTO udhaari_records (
-            id, person_id, person_name, amount_paise, paid_paise, payment_history, date_given, due_date, phone_number, notes, status, repaid_date, created_at, updated_at
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
+            id, person_id, person_name, type, amount_paise, paid_paise, payment_history, date_given, due_date, phone_number, notes, status, repaid_date, created_at, updated_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
           [
             rec.id,
             personId || null,
             rec.personName,
+            rec.type || 'given',
             rec.amountPaise,
             rec.paidPaise || 0,
             JSON.stringify(rec.paymentHistory || []),
@@ -491,6 +496,10 @@ export async function importRecords(
  */
 export function calculateMetrics(records: UdhaariRecord[]): DashboardMetrics {
   let totalOutstandingPaise = 0;
+  let totalGivenOutstandingPaise = 0;
+  let totalTakenOutstandingPaise = 0;
+  let givenCount = 0;
+  let takenCount = 0;
   let pendingCount = 0;
   let partialCount = 0;
   let totalOverduePaise = 0;
@@ -499,6 +508,13 @@ export function calculateMetrics(records: UdhaariRecord[]): DashboardMetrics {
   let repaidCount = 0;
 
   for (const r of records) {
+    const isTaken = r.type === 'taken';
+    if (isTaken) {
+      takenCount++;
+    } else {
+      givenCount++;
+    }
+
     const paid = r.paidPaise || 0;
     const remaining = Math.max(0, r.amountPaise - paid);
 
@@ -509,6 +525,12 @@ export function calculateMetrics(records: UdhaariRecord[]): DashboardMetrics {
       // Active debt (pending or partial)
       totalOutstandingPaise += remaining;
       totalRepaidPaise += paid;
+
+      if (isTaken) {
+        totalTakenOutstandingPaise += remaining;
+      } else {
+        totalGivenOutstandingPaise += remaining;
+      }
 
       if (r.status === 'partial') {
         partialCount++;
@@ -523,8 +545,15 @@ export function calculateMetrics(records: UdhaariRecord[]): DashboardMetrics {
     }
   }
 
+  const netBalancePaise = totalGivenOutstandingPaise - totalTakenOutstandingPaise;
+
   return {
     totalOutstandingPaise,
+    totalGivenOutstandingPaise,
+    totalTakenOutstandingPaise,
+    netBalancePaise,
+    givenCount,
+    takenCount,
     pendingCount,
     partialCount,
     totalOverduePaise,

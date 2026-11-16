@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { X, CheckCircle2, Split, BookUser } from 'lucide-react';
+import { X, CheckCircle2, Split, BookUser, ArrowUpRight, ArrowDownLeft } from 'lucide-react';
 import type { UdhaariRecord, UdhaariFormData, FormValidationErrors } from '../types/udhaari';
 import { paiseToRupees, formatINR, amountInWords } from '../utils/currency';
 import { getTodayDateString } from '../utils/date';
@@ -27,6 +27,7 @@ export const UdhaariFormModal: React.FC<UdhaariFormModalProps> = ({
 
   const [formData, setFormData] = useState<UdhaariFormData>({
     personName: '',
+    type: 'given',
     amountRupees: '',
     paidRupees: '0',
     dateGiven: getTodayDateString(),
@@ -43,6 +44,7 @@ export const UdhaariFormModal: React.FC<UdhaariFormModalProps> = ({
     if (editingRecord) {
       setFormData({
         personName: String(editingRecord.personName || ''),
+        type: editingRecord.type === 'taken' ? 'taken' : 'given',
         amountRupees: String(paiseToRupees(editingRecord.amountPaise || 0)),
         paidRupees: editingRecord.paidPaise ? String(paiseToRupees(editingRecord.paidPaise)) : '0',
         dateGiven: editingRecord.dateGiven || getTodayDateString(),
@@ -56,6 +58,7 @@ export const UdhaariFormModal: React.FC<UdhaariFormModalProps> = ({
       const cleanPhone = typeof initialPhoneNumber === 'string' ? initialPhoneNumber : '';
       setFormData({
         personName: cleanName,
+        type: 'given',
         amountRupees: '',
         paidRupees: '0',
         dateGiven: getTodayDateString(),
@@ -136,6 +139,7 @@ export const UdhaariFormModal: React.FC<UdhaariFormModalProps> = ({
 
       await onSubmit({
         personName: trimmedName,
+        type: formData.type,
         amountPaise,
         paidPaise,
         paymentHistory: editingRecord?.paymentHistory || [],
@@ -175,13 +179,17 @@ export const UdhaariFormModal: React.FC<UdhaariFormModalProps> = ({
       ? `${formatINR(parsedAmountForHelper * 100)} (${amountInWords(parsedAmountForHelper)})`
       : null;
 
+  const isTaken = formData.type === 'taken';
+
   return (
     <>
       <div className="modal-overlay" onClick={onClose}>
         <div className="modal-content-sheet" onClick={(e) => e.stopPropagation()}>
           <div className="modal-header">
             <h2 className="modal-title">
-              {isEditing ? 'Edit Credit Record' : 'Record New Credit'}
+              {isEditing
+                ? (isTaken ? 'उधार लिया एडिट करें' : 'उधार दिया एडिट करें')
+                : (isTaken ? 'नया उधार लिया (Borrowed)' : 'नया उधार दिया (Lent)')}
             </h2>
             <button
               type="button"
@@ -194,17 +202,37 @@ export const UdhaariFormModal: React.FC<UdhaariFormModalProps> = ({
           </div>
 
           <form onSubmit={handleSubmit} noValidate>
+            {/* Type Selector (मैंने दिया vs मैंने लिया) */}
+            <div className="type-toggle-container">
+              <button
+                type="button"
+                className={`type-toggle-btn ${!isTaken ? 'active-given' : ''}`}
+                onClick={() => setFormData({ ...formData, type: 'given' })}
+              >
+                <ArrowUpRight size={18} />
+                <span>मैंने दिया (Lent)</span>
+              </button>
+              <button
+                type="button"
+                className={`type-toggle-btn ${isTaken ? 'active-taken' : ''}`}
+                onClick={() => setFormData({ ...formData, type: 'taken' })}
+              >
+                <ArrowDownLeft size={18} />
+                <span>मैंने लिया (Borrowed)</span>
+              </button>
+            </div>
+
             {/* Person's Name */}
             <div className="form-group">
               <label className="form-label" htmlFor="personName" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                <span>Customer Name</span>
+                <span>{isTaken ? 'किससे लिया (Lender Name)' : 'ग्राहक का नाम (Borrower Name)'}</span>
                 <span className="required-star">*</span>
               </label>
               <input
                 id="personName"
                 type="text"
                 className={`form-input ${errors.personName ? 'has-error' : ''}`}
-                placeholder="e.g. Ramesh Kumar, Aman Sharma..."
+                placeholder={isTaken ? 'उदा. रोहित, शर्मा जी...' : 'उदा. रमेश कुमार, अमन शर्मा...'}
                 value={formData.personName}
                 onChange={(e) => {
                   setFormData({ ...formData, personName: e.target.value });
@@ -220,7 +248,7 @@ export const UdhaariFormModal: React.FC<UdhaariFormModalProps> = ({
             {/* Amount in Rupees */}
             <div className="form-group">
               <label className="form-label" htmlFor="amountRupees" style={{ display: 'flex', alignItems: 'center', gap: 4 }}>
-                <span>Credit Amount (₹)</span>
+                <span>{isTaken ? 'उधार ली गई राशि (₹)' : 'उधार दी गई राशि (₹)'}</span>
                 <span className="required-star">*</span>
               </label>
               <div style={{ position: 'relative' }}>
@@ -302,7 +330,7 @@ export const UdhaariFormModal: React.FC<UdhaariFormModalProps> = ({
             <div className="form-row-2">
               <div className="form-group">
                 <label className="form-label" htmlFor="dateGiven">
-                  Date Given <span className="required-star">*</span>
+                  {isTaken ? 'Date Taken' : 'Date Given'} <span className="required-star">*</span>
                 </label>
                 <input
                   id="dateGiven"
@@ -409,7 +437,15 @@ export const UdhaariFormModal: React.FC<UdhaariFormModalProps> = ({
                 disabled={isSubmitting}
               >
                 <CheckCircle2 size={16} />
-                <span>{isSubmitting ? 'Saving...' : isEditing ? 'Update Credit' : 'Save Credit'}</span>
+                <span>
+                  {isSubmitting
+                    ? 'Saving...'
+                    : isEditing
+                    ? 'Update Record'
+                    : isTaken
+                    ? 'सेव करें (मैंने लिया)'
+                    : 'सेव करें (मैंने दिया)'}
+                </span>
               </button>
             </div>
           </form>

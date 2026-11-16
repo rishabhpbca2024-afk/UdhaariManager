@@ -1,4 +1,5 @@
 export type UdhaariStatus = 'pending' | 'partial' | 'repaid';
+export type UdhaariType = 'given' | 'taken';
 
 export interface PaymentEntry {
   id: string;
@@ -11,6 +12,7 @@ export interface UdhaariRecord {
   id: string;
   personId?: string; // Stable identifier for person/customer
   personName: string;
+  type?: UdhaariType; // 'given' (मैंने दिया / Lent) or 'taken' (मैंने लिया / Borrowed), default 'given'
   amountPaise: number; // Stored as integer in paise (e.g. ₹500.00 = 50000)
   paidPaise: number; // Amount repaid so far in paise (default 0)
   paymentHistory: PaymentEntry[];
@@ -26,6 +28,7 @@ export interface UdhaariRecord {
 
 export type UdhaariFormData = {
   personName: string;
+  type: UdhaariType;
   amountRupees: string; // User input as string
   paidRupees: string; // Optional partial paid amount
   dateGiven: string;
@@ -43,12 +46,17 @@ export type FormValidationErrors = {
   phoneNumber?: string;
 };
 
-export type StatusFilter = 'all' | 'pending' | 'partial' | 'overdue' | 'repaid';
+export type StatusFilter = 'all' | 'given' | 'taken' | 'pending' | 'partial' | 'overdue' | 'repaid';
 
 export type SortField = 'newest' | 'oldest' | 'dueDate' | 'amountDesc' | 'amountAsc';
 
 export interface DashboardMetrics {
   totalOutstandingPaise: number; // (amountPaise - paidPaise) for all non-repaid records
+  totalGivenOutstandingPaise: number; // Total to receive (मैंने दिया - लेना है)
+  totalTakenOutstandingPaise: number; // Total to pay (मैंने लिया - देना है)
+  netBalancePaise: number; // totalGivenOutstandingPaise - totalTakenOutstandingPaise
+  givenCount: number;
+  takenCount: number;
   pendingCount: number;
   partialCount: number;
   totalOverduePaise: number;
@@ -65,7 +73,12 @@ export interface CustomerKhata {
   totalUdhaarPaise: number;
   totalPaidPaise: number;
   remainingPaise: number;
+  totalGivenPaise: number;
+  totalTakenPaise: number;
+  netRemainingPaise: number; // (remaining given) - (remaining taken)
   recordsCount: number;
+  givenRecordsCount: number;
+  takenRecordsCount: number;
   pendingCount: number;
   partialCount: number;
   repaidCount: number;

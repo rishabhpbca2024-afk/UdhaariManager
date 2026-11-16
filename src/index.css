@@ -1572,3 +1572,440 @@ input:checked + .slider:before {
   transform: translateX(20px);
   background-color: var(--primary-text-dark);
 }
+
+/* Udhaari Type Selector (मैंने दिया vs मैंने लिया) */
+.type-toggle-container {
+  display: flex;
+  background-color: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: 4px;
+  gap: 6px;
+  margin-bottom: 16px;
+}
+
+.type-toggle-btn {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  padding: 10px 12px;
+  background: transparent;
+  border: 1px solid transparent;
+  border-radius: var(--radius-sm);
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.type-toggle-btn.active-given {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34D399;
+  border-color: rgba(16, 185, 129, 0.4);
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.15);
+}
+
+.type-toggle-btn.active-taken {
+  background: rgba(239, 68, 68, 0.2);
+  color: #F87171;
+  border-color: rgba(239, 68, 68, 0.4);
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.15);
+}
+
+.record-type-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.72rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+  letter-spacing: 0.02em;
+}
+
+.record-type-badge.type-given {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34D399;
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.record-type-badge.type-taken {
+  background: rgba(239, 68, 68, 0.15);
+  color: #F87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+/* Dashboard 3-Way Grid */
+.dashboard-tri-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 14px;
+}
+
+.dashboard-tri-grid .metric-card.full-width {
+  grid-column: span 2;
+}
+
+.net-positive {
+  color: #34D399 !important;
+}
+
+.net-negative {
+  color: #F87171 !important;
+}
+
+.net-zero {
+  color: var(--text-secondary) !important;
+}
+
+/* ========================================================
+   3D TACTILE & NEUMORPHIC DESIGN SYSTEM
+   ======================================================== */
+
+/* General 3D Card Foundation */
+.card-3d {
+  position: relative;
+  background: linear-gradient(145deg, #16201A 0%, #0F1713 100%);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 
+    0 8px 24px -4px rgba(0, 0, 0, 0.65),
+    0 2px 6px rgba(0, 0, 0, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.5);
+  border-radius: var(--radius-lg);
+  transition: transform 0.2s cubic-bezier(0.34, 1.56, 0.64, 1), box-shadow 0.2s ease, border-color 0.2s ease;
+  overflow: hidden;
+}
+
+.card-3d:hover {
+  transform: translateY(-2px);
+  box-shadow: 
+    0 12px 30px -4px rgba(0, 0, 0, 0.75),
+    0 4px 10px rgba(0, 0, 0, 0.45),
+    inset 0 1px 0 rgba(255, 255, 255, 0.15),
+    inset 0 -1px 0 rgba(0, 0, 0, 0.5);
+  border-color: rgba(255, 255, 255, 0.14);
+}
+
+.card-3d:active {
+  transform: translateY(1px) scale(0.995);
+  box-shadow: 
+    0 4px 12px rgba(0, 0, 0, 0.5),
+    inset 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+/* 3D Edge Highlighting for Given (Green) vs Taken (Red) */
+.card-given-edge {
+  border-left: 4px solid #10B981 !important;
+  box-shadow: 
+    -2px 0 12px rgba(16, 185, 129, 0.15),
+    0 8px 24px -4px rgba(0, 0, 0, 0.65),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.card-taken-edge {
+  border-left: 4px solid #EF4444 !important;
+  box-shadow: 
+    -2px 0 12px rgba(239, 68, 68, 0.15),
+    0 8px 24px -4px rgba(0, 0, 0, 0.65),
+    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+/* 3D Balance Hero Card */
+.balance-hero-card {
+  padding: 18px 16px;
+  margin-bottom: 14px;
+  background: 
+    radial-gradient(ellipse at 80% 0%, rgba(16, 185, 129, 0.12) 0%, transparent 60%),
+    radial-gradient(ellipse at 20% 100%, rgba(239, 68, 68, 0.08) 0%, transparent 60%),
+    linear-gradient(160deg, #18241D 0%, #101914 50%, #0C120F 100%);
+  border: 1px solid rgba(52, 211, 153, 0.2);
+  border-radius: var(--radius-xl);
+  box-shadow: 
+    0 16px 36px -6px rgba(0, 0, 0, 0.8),
+    0 4px 12px rgba(0, 0, 0, 0.5),
+    inset 0 1px 1px rgba(255, 255, 255, 0.18),
+    inset 0 -1px 2px rgba(0, 0, 0, 0.6);
+}
+
+.balance-hero-header {
+  margin-bottom: 12px;
+}
+
+.balance-hero-title-wrap {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.icon-3d-bubble {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 
+    0 4px 10px rgba(0, 0, 0, 0.4),
+    inset 0 1px 1px rgba(255, 255, 255, 0.25),
+    inset 0 -2px 4px rgba(0, 0, 0, 0.5);
+}
+
+.balance-bubble {
+  background: linear-gradient(135deg, rgba(52, 211, 153, 0.25) 0%, rgba(16, 185, 129, 0.1) 100%);
+  color: #34D399;
+  border: 1px solid rgba(52, 211, 153, 0.4);
+}
+
+.balance-hero-subtitle {
+  display: block;
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-secondary);
+  margin-bottom: 2px;
+}
+
+.balance-hero-status-pill .net-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-size: 0.76rem;
+  font-weight: 600;
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+}
+
+.net-pill.positive {
+  background: rgba(16, 185, 129, 0.15);
+  color: #34D399;
+  border: 1px solid rgba(16, 185, 129, 0.35);
+  box-shadow: 0 2px 6px rgba(16, 185, 129, 0.15);
+}
+
+.net-pill.negative {
+  background: rgba(239, 68, 68, 0.15);
+  color: #F87171;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.15);
+}
+
+.net-pill.neutral {
+  background: rgba(255, 255, 255, 0.06);
+  color: var(--text-secondary);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+.balance-hero-amount-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  margin: 10px 0 16px 0;
+  padding-bottom: 14px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.balance-hero-value {
+  font-size: 2.1rem;
+  font-weight: 800;
+  letter-spacing: -0.03em;
+  line-height: 1.1;
+  text-shadow: 0 4px 14px rgba(0, 0, 0, 0.6);
+}
+
+.balance-hero-badge-tag {
+  font-size: 0.75rem;
+  font-weight: 700;
+  padding: 4px 10px;
+  border-radius: var(--radius-full);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+}
+
+.balance-hero-badge-tag.badge-given {
+  background: rgba(16, 185, 129, 0.18);
+  color: #34D399;
+  border: 1px solid rgba(16, 185, 129, 0.4);
+}
+
+.balance-hero-badge-tag.badge-taken {
+  background: rgba(239, 68, 68, 0.18);
+  color: #F87171;
+  border: 1px solid rgba(239, 68, 68, 0.4);
+}
+
+.balance-hero-badge-tag.badge-neutral {
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-secondary);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+}
+
+/* 3D Dual Receivable (दिया) & Payable (लिया) Cards */
+.balance-dual-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.dual-card {
+  padding: 12px 14px;
+  cursor: pointer;
+  border-radius: var(--radius-md);
+}
+
+.dual-card.given-card {
+  background: linear-gradient(145deg, rgba(16, 185, 129, 0.12) 0%, rgba(13, 23, 18, 0.95) 100%);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+.dual-card.given-card:hover {
+  border-color: rgba(52, 211, 153, 0.55);
+  box-shadow: 
+    0 8px 20px rgba(16, 185, 129, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.dual-card.taken-card {
+  background: linear-gradient(145deg, rgba(239, 68, 68, 0.12) 0%, rgba(25, 15, 17, 0.95) 100%);
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.dual-card.taken-card:hover {
+  border-color: rgba(248, 113, 113, 0.55);
+  box-shadow: 
+    0 8px 20px rgba(239, 68, 68, 0.2),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+.dual-card-header {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-bottom: 6px;
+}
+
+.dual-icon-badge {
+  width: 22px;
+  height: 22px;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.dual-icon-badge.given-badge {
+  background: rgba(16, 185, 129, 0.2);
+  color: #34D399;
+}
+
+.dual-icon-badge.taken-badge {
+  background: rgba(239, 68, 68, 0.2);
+  color: #F87171;
+}
+
+.dual-title {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.dual-amount {
+  font-size: 1.15rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  margin-bottom: 6px;
+}
+
+.dual-amount.given-amount {
+  color: #34D399;
+}
+
+.dual-amount.taken-amount {
+  color: #F87171;
+}
+
+.dual-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 0.68rem;
+  color: var(--text-muted);
+}
+
+.dual-action-arrow {
+  color: var(--text-secondary);
+  font-weight: 600;
+  transition: transform 0.15s ease;
+}
+
+.dual-card:hover .dual-action-arrow {
+  transform: translateX(2px);
+  color: var(--text-main);
+}
+
+/* 3D Action Pill Buttons for Lists */
+.filter-pill.active-given {
+  background: rgba(16, 185, 129, 0.25) !important;
+  color: #34D399 !important;
+  border-color: rgba(16, 185, 129, 0.5) !important;
+  box-shadow: 0 2px 8px rgba(16, 185, 129, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+}
+
+.filter-pill.active-taken {
+  background: rgba(239, 68, 68, 0.25) !important;
+  color: #F87171 !important;
+  border-color: rgba(239, 68, 68, 0.5) !important;
+  box-shadow: 0 2px 8px rgba(239, 68, 68, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.15) !important;
+}
+
+.btn-action-pill.pay {
+  background: rgba(239, 68, 68, 0.14);
+  color: #F87171;
+  border: 1px solid rgba(239, 68, 68, 0.35);
+  box-shadow: 0 2px 6px rgba(239, 68, 68, 0.15), inset 0 1px 0 rgba(255, 255, 255, 0.1);
+}
+
+.btn-action-pill.pay:hover {
+  background: rgba(239, 68, 68, 0.25);
+  border-color: rgba(239, 68, 68, 0.6);
+  transform: translateY(-1px);
+}
+
+/* 3D Buttons & Press Effects */
+.btn-primary {
+  box-shadow: 
+    0 4px 14px rgba(16, 185, 129, 0.35),
+    inset 0 1px 0 rgba(255, 255, 255, 0.3),
+    inset 0 -2px 0 rgba(0, 0, 0, 0.25) !important;
+  transition: all 0.18s cubic-bezier(0.34, 1.56, 0.64, 1) !important;
+}
+
+.btn-primary:active {
+  transform: translateY(2px) scale(0.98) !important;
+  box-shadow: 
+    0 1px 4px rgba(16, 185, 129, 0.2),
+    inset 0 2px 4px rgba(0, 0, 0, 0.3) !important;
+}
+
+.quick-action-cta {
+  transition: all 0.2s cubic-bezier(0.34, 1.56, 0.64, 1);
+  box-shadow: 
+    0 8px 24px -4px rgba(0, 0, 0, 0.65),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+.quick-action-cta:hover {
+  transform: translateY(-2px);
+  border-color: rgba(52, 211, 153, 0.4);
+  box-shadow: 
+    0 12px 28px -4px rgba(16, 185, 129, 0.18),
+    0 4px 10px rgba(0, 0, 0, 0.5),
+    inset 0 1px 0 rgba(255, 255, 255, 0.2);
+}
+
+

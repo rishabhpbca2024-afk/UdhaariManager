@@ -65,6 +65,12 @@ export function groupRecordsByCustomer(records: UdhaariRecord[]): CustomerKhata[
   for (const [, { canonicalName, phoneNumber, records: customerRecords }] of map) {
     let totalUdhaarPaise = 0;
     let totalPaidPaise = 0;
+    let totalGivenPaise = 0;
+    let totalTakenPaise = 0;
+    let remainingGiven = 0;
+    let remainingTaken = 0;
+    let givenRecordsCount = 0;
+    let takenRecordsCount = 0;
     let pendingCount = 0;
     let partialCount = 0;
     let repaidCount = 0;
@@ -80,8 +86,23 @@ export function groupRecordsByCustomer(records: UdhaariRecord[]): CustomerKhata[
 
     for (const r of customerRecords) {
       const paid = r.paidPaise || 0;
+      const remaining = Math.max(0, r.amountPaise - paid);
       totalUdhaarPaise += r.amountPaise;
       totalPaidPaise += paid;
+
+      if (r.type === 'taken') {
+        takenRecordsCount++;
+        totalTakenPaise += r.amountPaise;
+        if (r.status !== 'repaid' && remaining > 0) {
+          remainingTaken += remaining;
+        }
+      } else {
+        givenRecordsCount++;
+        totalGivenPaise += r.amountPaise;
+        if (r.status !== 'repaid' && remaining > 0) {
+          remainingGiven += remaining;
+        }
+      }
 
       if (r.dateGiven > lastDate) {
         lastDate = r.dateGiven;
@@ -90,7 +111,6 @@ export function groupRecordsByCustomer(records: UdhaariRecord[]): CustomerKhata[
       if (r.status === 'repaid' || paid >= r.amountPaise) {
         repaidCount++;
       } else {
-        const remaining = Math.max(0, r.amountPaise - paid);
         if (remaining > 0) {
           if (r.dueDate && isDueDatePassed(r.dueDate)) {
             overdueCount++;
@@ -105,6 +125,7 @@ export function groupRecordsByCustomer(records: UdhaariRecord[]): CustomerKhata[
     }
 
     const remainingPaise = Math.max(0, totalUdhaarPaise - totalPaidPaise);
+    const netRemainingPaise = remainingGiven - remainingTaken;
     const personId = getStablePersonId(canonicalName, phoneNumber);
 
     khatas.push({
@@ -114,7 +135,12 @@ export function groupRecordsByCustomer(records: UdhaariRecord[]): CustomerKhata[
       totalUdhaarPaise,
       totalPaidPaise,
       remainingPaise,
+      totalGivenPaise,
+      totalTakenPaise,
+      netRemainingPaise,
       recordsCount: customerRecords.length,
+      givenRecordsCount,
+      takenRecordsCount,
       pendingCount,
       partialCount,
       repaidCount,
@@ -143,6 +169,9 @@ export function getCustomerSummary(records: UdhaariRecord[], personName: string 
   if (!norm) {
     return {
       totalRemainingPaise: 0,
+      totalGivenPaise: 0,
+      totalTakenPaise: 0,
+      netRemainingPaise: 0,
       recordsCount: 0,
       totalUdhaarPaise: 0,
       totalPaidPaise: 0,
@@ -153,14 +182,35 @@ export function getCustomerSummary(records: UdhaariRecord[], personName: string 
 
   let totalUdhaarPaise = 0;
   let totalPaidPaise = 0;
+  let totalGivenPaise = 0;
+  let totalTakenPaise = 0;
+  let remainingGiven = 0;
+  let remainingTaken = 0;
 
   for (const r of matched) {
+    const paid = r.paidPaise || 0;
+    const remaining = Math.max(0, (r.amountPaise || 0) - paid);
     totalUdhaarPaise += (r.amountPaise || 0);
-    totalPaidPaise += (r.paidPaise || 0);
+    totalPaidPaise += paid;
+
+    if (r.type === 'taken') {
+      totalTakenPaise += (r.amountPaise || 0);
+      if (r.status !== 'repaid' && remaining > 0) {
+        remainingTaken += remaining;
+      }
+    } else {
+      totalGivenPaise += (r.amountPaise || 0);
+      if (r.status !== 'repaid' && remaining > 0) {
+        remainingGiven += remaining;
+      }
+    }
   }
 
   return {
     totalRemainingPaise: Math.max(0, totalUdhaarPaise - totalPaidPaise),
+    totalGivenPaise,
+    totalTakenPaise,
+    netRemainingPaise: remainingGiven - remainingTaken,
     recordsCount: matched.length,
     totalUdhaarPaise,
     totalPaidPaise,

@@ -47,9 +47,17 @@ export const RecordList: React.FC<RecordListProps> = ({
     let partial = 0;
     let overdue = 0;
     let repaid = 0;
+    let given = 0;
+    let taken = 0;
 
     for (const r of records) {
       if (!r) continue;
+      if (r.type === 'taken') {
+        taken++;
+      } else {
+        given++;
+      }
+
       if (r.status === 'repaid') {
         repaid++;
       } else {
@@ -65,7 +73,7 @@ export const RecordList: React.FC<RecordListProps> = ({
       }
     }
 
-    return { all: records.length, pending, partial, overdue, repaid };
+    return { all: records.length, given, taken, pending, partial, overdue, repaid };
   }, [records]);
 
   // Filter and sort records
@@ -85,6 +93,12 @@ export const RecordList: React.FC<RecordListProps> = ({
         }
 
         // Status Filter
+        if (activeFilter === 'given') {
+          return record.type !== 'taken';
+        }
+        if (activeFilter === 'taken') {
+          return record.type === 'taken';
+        }
         if (activeFilter === 'pending') {
           return record.status === 'pending';
         }
@@ -219,6 +233,22 @@ export const RecordList: React.FC<RecordListProps> = ({
             onClick={() => onFilterChange('all')}
           >
             All <span className="filter-pill-badge">{counts.all}</span>
+          </button>
+
+          <button
+            type="button"
+            className={`filter-pill ${activeFilter === 'given' ? 'active-given' : ''}`}
+            onClick={() => onFilterChange('given')}
+          >
+            🟢 दिया (Given) <span className="filter-pill-badge">{counts.given}</span>
+          </button>
+
+          <button
+            type="button"
+            className={`filter-pill ${activeFilter === 'taken' ? 'active-taken' : ''}`}
+            onClick={() => onFilterChange('taken')}
+          >
+            🔴 लिया (Taken) <span className="filter-pill-badge">{counts.taken}</span>
           </button>
 
           <button

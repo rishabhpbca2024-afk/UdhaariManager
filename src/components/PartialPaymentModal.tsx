@@ -25,6 +25,7 @@ export const PartialPaymentModal: React.FC<PartialPaymentModalProps> = ({
 
   if (!isOpen || !record) return null;
 
+  const isTaken = record.type === 'taken';
   const totalPaise = record.amountPaise;
   const alreadyPaidPaise = record.paidPaise || 0;
   const remainingPaise = Math.max(0, totalPaise - alreadyPaidPaise);
@@ -70,9 +71,9 @@ export const PartialPaymentModal: React.FC<PartialPaymentModalProps> = ({
       <div className="modal-content-sheet" onClick={(e) => e.stopPropagation()}>
         <div className="modal-header">
           <div>
-            <h2 className="modal-title">Receive Payment</h2>
+            <h2 className="modal-title">{isTaken ? 'Pay Installment (किश्त चुकाएं)' : 'Receive Payment (किश्त प्राप्त करें)'}</h2>
             <p style={{ fontSize: '0.78rem', color: 'var(--text-secondary)' }}>
-              Customer: {record.personName}
+              {isTaken ? 'Lender / जिससे लिया: ' : 'Customer / जिसको दिया: '}{record.personName}
             </p>
           </div>
           <button
@@ -129,7 +130,7 @@ export const PartialPaymentModal: React.FC<PartialPaymentModalProps> = ({
           {/* Payment Amount Input */}
           <div className="form-group">
             <label className="form-label" htmlFor="partialAmount">
-              Payment Amount Received (₹) <span className="required-star">*</span>
+              {isTaken ? 'Payment Amount (₹) - मैंने चुकाया' : 'Payment Amount Received (₹) - प्राप्त हुआ'} <span className="required-star">*</span>
             </label>
             <div style={{ position: 'relative' }}>
               <input
@@ -247,7 +248,7 @@ export const PartialPaymentModal: React.FC<PartialPaymentModalProps> = ({
               disabled={isSubmitting}
             >
               <CheckCircle2 size={16} />
-              <span>{isSubmitting ? 'Saving...' : 'Record Payment'}</span>
+              <span>{isSubmitting ? 'Saving...' : isTaken ? 'Record Repayment' : 'Record Payment'}</span>
             </button>
           </div>
         </form>

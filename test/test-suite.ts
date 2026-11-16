@@ -385,6 +385,68 @@ const replacedList = [...backupToRestore];
 assert(replacedList.length === 2, 'Replace contains exactly the 2 records from backup');
 assert(!replacedList.some((r) => r.id === 'rec-2'), 'Old records not in backup are replaced in replace mode');
 
+console.log('\n--- TEST 12: Dual Udhaari (मैंने दिया vs मैंने लिया) & Net Balance Calculations ---');
+const dualRecords: UdhaariRecord[] = [
+  {
+    id: 'd-1',
+    personName: 'Vikram',
+    type: 'given', // मैंने दिया (₹5,000 lena hai)
+    amountPaise: 500000,
+    paidPaise: 100000, // ₹4,000 remaining
+    paymentHistory: [],
+    dateGiven: '2026-11-01',
+    dueDate: '2026-11-20',
+    phoneNumber: '9876543210',
+    notes: 'Loan to Vikram',
+    status: 'partial',
+    repaidDate: null,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: 'd-2',
+    personName: 'Vikram',
+    type: 'taken', // मैंने लिया (₹1,500 dena hai)
+    amountPaise: 150000,
+    paidPaise: 0, // ₹1,500 remaining
+    paymentHistory: [],
+    dateGiven: '2026-11-05',
+    dueDate: null,
+    phoneNumber: '9876543210',
+    notes: 'Borrowed for materials',
+    status: 'pending',
+    repaidDate: null,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+  {
+    id: 'd-3',
+    personName: 'Sunita',
+    type: 'taken', // मैंने लिया (₹2,000 dena hai)
+    amountPaise: 200000,
+    paidPaise: 50000, // ₹1,500 remaining
+    paymentHistory: [],
+    dateGiven: '2026-11-02',
+    dueDate: null,
+    phoneNumber: null,
+    notes: 'Borrowed from Sunita',
+    status: 'partial',
+    repaidDate: null,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString(),
+  },
+];
+
+const dualMetrics = calculateMetrics(dualRecords);
+// Given remaining: d-1 = 400000 paise (₹4,000)
+assert(dualMetrics.totalGivenOutstandingPaise === 400000, 'Total given receivable is ₹4,000');
+// Taken remaining: d-2 = 150000 + d-3 = 150000 = 300000 paise (₹3,000)
+assert(dualMetrics.totalTakenOutstandingPaise === 300000, 'Total taken payable is ₹3,000');
+// Net Balance: 400000 - 300000 = +100000 paise (+₹1,000 to receive)
+assert(dualMetrics.netBalancePaise === 100000, 'Net balance is +₹1,000 (Receivable)');
+assert(dualMetrics.givenCount === 1, 'Given count is 1');
+assert(dualMetrics.takenCount === 2, 'Taken count is 2');
+
 console.log(`\n========================================`);
 if (failures === 0) {
   console.log('🎉 ALL UNIT & INTEGRATION TESTS PASSED!');

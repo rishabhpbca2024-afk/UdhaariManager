@@ -10,6 +10,8 @@ import {
   AlertTriangle,
   MessageCircle,
   Split,
+  ArrowUpRight,
+  ArrowDownLeft,
 } from 'lucide-react';
 import type { UdhaariRecord } from '../types/udhaari';
 import { formatINR } from '../utils/currency';
@@ -35,6 +37,7 @@ export const RecordCard: React.FC<RecordCardProps> = ({
   onOpenLedger,
 }) => {
   const isRepaid = record.status === 'repaid';
+  const isTaken = record.type === 'taken';
   const isPartial = record.status === 'partial' || (!isRepaid && (record.paidPaise || 0) > 0);
   const isOverdue = !isRepaid && record.dueDate ? isDueDatePassed(record.dueDate) : false;
   const daysOverdue = isOverdue ? getDaysOverdue(record.dueDate) : 0;
@@ -57,8 +60,8 @@ export const RecordCard: React.FC<RecordCardProps> = ({
   const cleanPhone = record.phoneNumber ? record.phoneNumber.replace(/[^0-9+]/g, '') : '';
 
   return (
-    <div className={`record-card ${borderClass}`}>
-      {/* Top Header: Customer Name and Amount */}
+    <div className={`record-card card-3d ${borderClass} ${isTaken ? 'card-taken-edge' : 'card-given-edge'}`}>
+      {/* Top Header: Customer Name, Type Badge and Amount */}
       <div className="record-card-header">
         <div className="record-customer-info">
           <div className="record-name-wrap">
@@ -70,6 +73,10 @@ export const RecordCard: React.FC<RecordCardProps> = ({
             >
               {record.personName}
             </h3>
+            <span className={`record-type-badge ${isTaken ? 'type-taken' : 'type-given'}`}>
+              {isTaken ? <ArrowDownLeft size={10} /> : <ArrowUpRight size={10} />}
+              <span>{isTaken ? 'मैंने लिया' : 'मैंने दिया'}</span>
+            </span>
             {customerGrandTotal && customerGrandTotal.count > 1 && (
               <span
                 className="record-grand-total-tag"
@@ -172,12 +179,12 @@ export const RecordCard: React.FC<RecordCardProps> = ({
           {!isRepaid && (
             <button
               type="button"
-              className="btn-action-pill receive"
+              className={`btn-action-pill ${isTaken ? 'pay' : 'receive'}`}
               onClick={() => onOpenPartialPayment(record)}
-              title="Receive Payment"
+              title={isTaken ? 'Pay Installment (किश्त दें)' : 'Receive Payment (किश्त लें)'}
             >
               <Split size={13} />
-              <span>Receive</span>
+              <span>{isTaken ? 'Pay' : 'Receive'}</span>
             </button>
           )}
 

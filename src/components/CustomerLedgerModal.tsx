@@ -52,7 +52,7 @@ export const CustomerLedgerModal: React.FC<CustomerLedgerModalProps> = ({
 
   if (!isOpen || !khata) return null;
 
-  const isSettled = khata.remainingPaise === 0;
+  const isSettled = (khata.netRemainingPaise ?? khata.remainingPaise) === 0;
   const cleanPhone = khata.phoneNumber ? khata.phoneNumber.replace(/[^0-9+]/g, '') : '';
 
   const handleWhatsAppStatement = () => {
@@ -130,35 +130,52 @@ export const CustomerLedgerModal: React.FC<CustomerLedgerModalProps> = ({
         </div>
 
         {/* Customer Totals Summary Card */}
-        <div className="ledger-summary-banner">
+        <div className="ledger-summary-banner card-3d">
           <div className="ledger-summary-metric">
-            <span className="ledger-metric-label">Net Outstanding Balance</span>
+            <span className="ledger-metric-label">
+              {khata.netRemainingPaise > 0
+                ? 'नेट लेना है (Net Receivable)'
+                : khata.netRemainingPaise < 0
+                ? 'नेट देना है (Net Payable)'
+                : 'नेट बैलेंस (Net Balance)'}
+            </span>
             <span
               className="ledger-metric-value"
-              style={{ color: isSettled ? 'var(--primary)' : 'var(--status-overdue-text)' }}
+              style={{
+                color:
+                  isSettled
+                    ? 'var(--primary)'
+                    : khata.netRemainingPaise > 0
+                    ? 'var(--status-pending-text)'
+                    : '#F87171',
+              }}
             >
-              {formatINR(khata.remainingPaise)}
+              {formatINR(Math.abs(khata.netRemainingPaise ?? khata.remainingPaise))}
             </span>
           </div>
 
           <div className="ledger-summary-grid">
             <div className="ledger-sub-stat">
-              <span className="sub-stat-lbl">Total Credit</span>
-              <span className="sub-stat-val">{formatINR(khata.totalUdhaarPaise)}</span>
+              <span className="sub-stat-lbl">🟢 दिया (Lent)</span>
+              <span className="sub-stat-val" style={{ color: '#34D399' }}>
+                {formatINR(khata.totalGivenPaise ?? khata.totalUdhaarPaise)}
+              </span>
+            </div>
+            <div className="ledger-sub-stat">
+              <span className="sub-stat-lbl">🔴 लिया (Taken)</span>
+              <span className="sub-stat-val" style={{ color: '#F87171' }}>
+                {formatINR(khata.totalTakenPaise ?? 0)}
+              </span>
             </div>
             <div className="ledger-sub-stat">
               <span className="sub-stat-lbl">Total Paid</span>
-              <span className="sub-stat-val" style={{ color: 'var(--primary)' }}>{formatINR(khata.totalPaidPaise)}</span>
-            </div>
-            <div className="ledger-sub-stat">
-              <span className="sub-stat-lbl">Total Loans</span>
-              <span className="sub-stat-val">{khata.recordsCount}</span>
-            </div>
-            <div className="ledger-sub-stat">
-              <span className="sub-stat-lbl">Overdue</span>
-              <span className="sub-stat-val" style={{ color: khata.overdueCount > 0 ? 'var(--status-overdue-text)' : 'inherit' }}>
-                {khata.overdueCount}
+              <span className="sub-stat-val" style={{ color: 'var(--primary)' }}>
+                {formatINR(khata.totalPaidPaise)}
               </span>
+            </div>
+            <div className="ledger-sub-stat">
+              <span className="sub-stat-lbl">Entries</span>
+              <span className="sub-stat-val">{khata.recordsCount}</span>
             </div>
           </div>
         </div>

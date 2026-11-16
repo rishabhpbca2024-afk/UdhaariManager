@@ -9,6 +9,7 @@ CREATE TABLE IF NOT EXISTS udhaari_records (
   id TEXT PRIMARY KEY NOT NULL,
   person_id TEXT,
   person_name TEXT NOT NULL,
+  type TEXT NOT NULL DEFAULT 'given',
   amount_paise INTEGER NOT NULL,
   paid_paise INTEGER NOT NULL DEFAULT 0,
   payment_history TEXT NOT NULL DEFAULT '[]',
@@ -22,6 +23,7 @@ CREATE TABLE IF NOT EXISTS udhaari_records (
   updated_at TEXT NOT NULL
 );
 CREATE INDEX IF NOT EXISTS idx_records_status ON udhaari_records(status);
+CREATE INDEX IF NOT EXISTS idx_records_type ON udhaari_records(type);
 CREATE INDEX IF NOT EXISTS idx_records_date_given ON udhaari_records(date_given);
 CREATE INDEX IF NOT EXISTS idx_records_person_name ON udhaari_records(person_name);
 CREATE INDEX IF NOT EXISTS idx_records_person_id ON udhaari_records(person_id);
@@ -99,6 +101,15 @@ export async function initializeDatabase(): Promise<void> {
         // column already exists
       }
 
+      try {
+        await CapacitorSQLite.execute({
+          database: DB_NAME,
+          statements: `ALTER TABLE udhaari_records ADD COLUMN type TEXT NOT NULL DEFAULT 'given';`,
+        });
+      } catch {
+        // column already exists
+      }
+
       isDbInitialized = true;
       console.log('Udhaari Manager: Native SQLite database successfully initialized');
     } catch (err) {
@@ -140,6 +151,7 @@ export function mapSqliteRowToRecord(row: Record<string, unknown>): UdhaariRecor
     id: String(row.id),
     personId: row.person_id ? String(row.person_id) : undefined,
     personName: String(row.person_name),
+    type: row.type === 'taken' ? 'taken' : 'given',
     amountPaise: Number(row.amount_paise),
     paidPaise: Number(row.paid_paise || 0),
     paymentHistory,
