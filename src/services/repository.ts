@@ -414,12 +414,13 @@ export async function importRecords(
         const personId = rec.personId || getStablePersonId(rec.personName, rec.phoneNumber);
         await executeRun(
           `INSERT INTO udhaari_records (
-            id, person_id, person_name, amount_paise, paid_paise, payment_history, date_given, due_date, phone_number, notes, status, repaid_date, created_at, updated_at
-          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
+            id, person_id, person_name, type, amount_paise, paid_paise, payment_history, date_given, due_date, phone_number, notes, status, repaid_date, created_at, updated_at
+          ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?);`,
           [
             rec.id,
             personId || null,
             rec.personName,
+            rec.type || 'given',
             rec.amountPaise,
             rec.paidPaise || 0,
             JSON.stringify(rec.paymentHistory || []),

@@ -20,8 +20,6 @@ CREATE TABLE IF NOT EXISTS app_contacts (
   source TEXT NOT NULL DEFAULT 'manual',
   created_at TEXT NOT NULL
 );
-CREATE INDEX IF NOT EXISTS idx_contacts_name ON app_contacts(name);
-CREATE INDEX IF NOT EXISTS idx_contacts_phone ON app_contacts(phone_number);
 `;
 
 let isContactsTableReady = false;
@@ -39,6 +37,23 @@ export async function initializeContactsTable(): Promise<void> {
         database: DB_NAME,
         statements: CREATE_CONTACTS_TABLE_SQL,
       });
+
+      // Indexes in safe isolated blocks
+      const contactIndices = [
+        `CREATE INDEX IF NOT EXISTS idx_contacts_name ON app_contacts(name);`,
+        `CREATE INDEX IF NOT EXISTS idx_contacts_phone ON app_contacts(phone_number);`,
+      ];
+      for (const idx of contactIndices) {
+        try {
+          await CapacitorSQLite.execute({
+            database: DB_NAME,
+            statements: idx,
+          });
+        } catch {
+          // Index already exists
+        }
+      }
+
       isContactsTableReady = true;
     } catch (err) {
       console.warn('Failed to initialize app_contacts table:', err);

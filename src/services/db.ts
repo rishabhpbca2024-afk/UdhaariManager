@@ -22,11 +22,6 @@ CREATE TABLE IF NOT EXISTS udhaari_records (
   created_at TEXT NOT NULL,
   updated_at TEXT NOT NULL
 );
-CREATE INDEX IF NOT EXISTS idx_records_status ON udhaari_records(status);
-CREATE INDEX IF NOT EXISTS idx_records_type ON udhaari_records(type);
-CREATE INDEX IF NOT EXISTS idx_records_date_given ON udhaari_records(date_given);
-CREATE INDEX IF NOT EXISTS idx_records_person_name ON udhaari_records(person_name);
-CREATE INDEX IF NOT EXISTS idx_records_person_id ON udhaari_records(person_id);
 `;
 
 const WEB_STORAGE_KEY = 'udhaari_records_offline_store';
@@ -57,63 +52,97 @@ export async function initializeDatabase(): Promise<void> {
           version: 1,
           readonly: false,
         });
-      } catch {
-        // Connection already created
+      } catch (connErr) {
+        // Connection already created or active
+        console.log('Udhaari Manager: SQLite connection exists/handled', connErr);
       }
 
       // Check if DB is opened
-      const isOpen = await CapacitorSQLite.isDBOpen({ database: DB_NAME });
-      if (!isOpen.result) {
-        await CapacitorSQLite.open({ database: DB_NAME, readonly: false });
+      try {
+        const isOpen = await CapacitorSQLite.isDBOpen({ database: DB_NAME });
+        if (!isOpen.result) {
+          await CapacitorSQLite.open({ database: DB_NAME, readonly: false });
+        }
+      } catch (openErr) {
+        console.warn('Udhaari Manager: isDBOpen check note, attempting open:', openErr);
+        try {
+          await CapacitorSQLite.open({ database: DB_NAME, readonly: false });
+        } catch (finalOpenErr) {
+          console.error('Udhaari Manager: SQLite open error:', finalOpenErr);
+        }
       }
 
-      // Run schema migrations/creation
-      await CapacitorSQLite.execute({
-        database: DB_NAME,
-        statements: CREATE_TABLE_SQL,
-      });
-
-      // Backward-compatible migrations for existing databases
+      // 1. Run base table creation (without indexes bundled to prevent failure on older schemas)
       try {
         await CapacitorSQLite.execute({
           database: DB_NAME,
-          statements: `ALTER TABLE udhaari_records ADD COLUMN paid_paise INTEGER NOT NULL DEFAULT 0;`,
+          statements: CREATE_TABLE_SQL,
         });
-      } catch {
-        // column already exists
+      } catch (createErr) {
+        console.warn('Udhaari Manager: CREATE TABLE note:', createErr);
       }
 
-      try {
-        await CapacitorSQLite.execute({
-          database: DB_NAME,
-          statements: `ALTER TABLE udhaari_records ADD COLUMN payment_history TEXT NOT NULL DEFAULT '[]';`,
-        });
-      } catch {
-        // column already exists
+      // 2. Backward-compatible migrations for existing databases
+      // Run each migration in its own isolated try/catch so any column already present is non-fatal
+      const migrations = [
+        `ALTER TABLE udhaari_records ADD COLUMN paid_paise INTEGER NOT NULL DEFAULT 0;`,
+        `ALTER TABLE udhaari_records ADD COLUMN payment_history TEXT NOT NULL DEFAULT '[]';`,
+        `ALTER TABLE udhaari_records ADD COLUMN person_id TEXT;`,
+        `ALTER TABLE udhaari_records ADD COLUMN type TEXT NOT NULL DEFAULT 'given';`,
+      ];
+
+      for (const statement of migrations) {
+        try {
+          await CapacitorSQLite.execute({
+            database: DB_NAME,
+            statements: statement,
+          });
+        } catch {
+          // Column already exists or freshly created with column
+        }
       }
 
-      try {
-        await CapacitorSQLite.execute({
-          database: DB_NAME,
-          statements: `ALTER TABLE udhaari_records ADD COLUMN person_id TEXT;`,
-        });
-      } catch {
-        // column already exists
-      }
+      // 3. Now that all columns are guaranteed to exist, create indexes safely
+      const indices = [
+        `CREATE INDEX IF NOT EXISTS idx_records_status ON udhaari_records(status);`,
+        `CREATE INDEX IF NOT EXISTS idx_records_type ON udhaari_records(type);`,
+        `CREATE INDEX IF NOT EXISTS idx_records_date_given ON udhaari_records(date_given);`,
+        `CREATE INDEX IF NOT EXISTS idx_records_person_name ON udhaari_records(person_name);`,
+        `CREATE INDEX IF NOT EXISTS idx_records_person_id ON udhaari_records(person_id);`,
+      ];
 
-      try {
-        await CapacitorSQLite.execute({
-          database: DB_NAME,
-          statements: `ALTER TABLE udhaari_records ADD COLUMN type TEXT NOT NULL DEFAULT 'given';`,
-        });
-      } catch {
-        // column already exists
+      for (const statement of indices) {
+        try {
+          await CapacitorSQLite.execute({
+            database: DB_NAME,
+            statements: statement,
+          });
+        } catch (indexErr) {
+          console.warn('Udhaari Manager: Index creation note:', indexErr);
+        }
       }
 
       isDbInitialized = true;
       console.log('Udhaari Manager: Native SQLite database successfully initialized');
     } catch (err) {
       console.error('Udhaari Manager: SQLite initialization error', err);
+
+      // Graceful verification: if the table can already be queried, mark initialized and continue
+      try {
+        const testRes = await CapacitorSQLite.query({
+          database: DB_NAME,
+          statement: 'SELECT count(*) as count FROM udhaari_records;',
+          values: [],
+        });
+        if (testRes) {
+          isDbInitialized = true;
+          console.log('Udhaari Manager: Database verified and accessible despite init warning');
+          return;
+        }
+      } catch (testErr) {
+        console.error('Udhaari Manager: Database recovery test also failed', testErr);
+      }
+
       throw new Error(`Failed to initialize SQLite database: ${err instanceof Error ? err.message : String(err)}`);
     }
   } else {
